@@ -1,0 +1,3434 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>ARGUS · Advanced Intelligence Platform</title>
+  <meta name="description" content="ARGUS Advanced Intelligence Platform — Law Enforcement Edition. IP geolocation &amp; threat scoring, telecom tracing, email &amp; username footprinting, breach detection, domain &amp; network forensics." />
+  <meta name="author" content="Rajarshi Chakraborty" />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="theme-color" content="#0a0a0c" />
+  <link rel="canonical" href="https://argus.local/" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="ARGUS · Advanced Intelligence Platform" />
+  <meta property="og:description" content="Law-enforcement OSINT suite: IP, telecom, email, username, breach, domain and network intelligence." />
+  <meta property="og:site_name" content="ARGUS Intelligence Platform" />
+  <meta property="og:url" content="https://argus.local/" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="ARGUS · Advanced Intelligence Platform" />
+  <meta name="twitter:description" content="Law-enforcement OSINT suite: IP, telecom, email, username, breach, domain and network intelligence." />
+
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f5f5f7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3Cpath d='M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83'/%3E%3C/svg%3E" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      /* Native Apple system stack — no web fonts, crisp on macOS/iOS/Windows/Ubuntu/Kali */
+      --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", system-ui, Roboto, "Helvetica Neue", Arial, sans-serif;
+      --display: var(--font);
+      --mono: ui-monospace, "SF Mono", "SFMono-Regular", Menlo, "Cascadia Mono", "Consolas", "Liberation Mono", monospace;
+
+      /* Apple-minimal monochrome palette */
+      --bg-base:           #0a0a0c;
+      --bg-glass:          rgba(255, 255, 255, 0.04);
+      --bg-glass-hover:    rgba(255, 255, 255, 0.06);
+      --border-glass:      rgba(255, 255, 255, 0.10);
+      --text-primary:      #f5f5f7;
+      --text-secondary:    #a1a1a6;
+      --text-tertiary:     rgba(245, 245, 247, 0.46);
+      --text-quaternary:   rgba(245, 245, 247, 0.24);
+      --success:           #5fb37a;
+      --danger:            #d6605e;
+      --shadow:            0 8px 32px rgba(0, 0, 0, 0.5);
+
+      /* restrained neutral accent (soft silver / white) */
+      --accent:       #f5f5f7;
+      --accent-dim:   rgba(255, 255, 255, 0.10);
+      --accent-soft:  rgba(255, 255, 255, 0.08);
+      --accent-glow:  rgba(255, 255, 255, 0.18);
+      --accent-border:rgba(255, 255, 255, 0.18);
+      --warn:         #c7c7cc;
+
+      /* aliases used by inline JS / older rules */
+      --bg:           var(--bg-base);
+      --bg-elevated:  #141417;
+      --bg-card:      var(--bg-glass);
+      --bg-card-hover:var(--bg-glass-hover);
+      --border:       var(--border-glass);
+      --border-hover: rgba(255, 255, 255, 0.28);
+      --green:        var(--success);
+      --red:          var(--danger);
+      --orange:       var(--warn);
+
+      --sidebar-w: 220px;
+      --header-h:  56px;
+      --r: 16px;
+    }
+
+    /* Solid fallback first; @supports layers the frost on capable browsers */
+    .glass-panel {
+      background: rgba(20, 20, 24, 0.86);
+      border: 1px solid var(--border-glass);
+      border-radius: 20px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 20px 60px rgba(0,0,0,0.5);
+    }
+    @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+      .glass-panel {
+        background: rgba(255, 255, 255, 0.04);
+        backdrop-filter: blur(24px) saturate(170%);
+        -webkit-backdrop-filter: blur(24px) saturate(170%);
+      }
+    }
+
+    html { scroll-behavior: smooth; background: var(--bg-base); -webkit-text-size-adjust: 100%; }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg-base);
+      color: var(--text-primary);
+      min-height: 100vh;
+      font-weight: 400;
+      letter-spacing: -0.003em;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+      overflow-x: hidden;
+    }
+
+    /* ── Ambient background (single fixed layer, GPU-cheap) ── */
+    .bg-layer {
+      position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
+      background:
+        radial-gradient(ellipse 80% 55% at 50% -12%, rgba(255, 255, 255, 0.05) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 15% 90%, rgba(255, 255, 255, 0.02) 0%, transparent 55%),
+        var(--bg-base);
+    }
+    .bg-layer::after {
+      content: ''; position: absolute; inset: 0; opacity: 0.025;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+    .bg-orb { display: none; }
+
+    /* ── Header ── */
+    .header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      height: var(--header-h);
+      background: rgba(10, 10, 12, 0.86);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border-bottom: 1px solid var(--border-glass);
+    }
+    @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+      .header { background: rgba(10, 10, 12, 0.97); }
+    }
+    .header-inner {
+      display: flex; align-items: center; height: 100%;
+      padding: 0 24px; gap: 16px;
+    }
+    .logo {
+      display: flex; align-items: center; gap: 12px;
+      white-space: nowrap;
+    }
+    .logo-icon {
+      width: 32px; height: 32px; border-radius: 10px;
+      background: var(--accent-dim); border: 1px solid var(--accent-border);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .logo-icon svg { width: 17px; height: 17px; color: var(--accent); }
+    .logo-sub {
+      font-size: 10px; font-weight: 500; color: var(--text-tertiary);
+      letter-spacing: 0.12em; display: block; margin-top: 2px;
+      font-family: var(--font);
+    }
+    .logo-stack { display: flex; flex-direction: column; gap: 1px; }
+    .logo-name {
+      font-family: var(--display); font-size: 20px; font-weight: 700;
+      color: var(--accent); letter-spacing: 0.04em;
+    }
+    .classified-badge {
+      font-size: 9px; font-weight: 700; letter-spacing: 0.14em;
+      color: var(--accent); background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      padding: 3px 8px; border-radius: 6px; text-transform: uppercase;
+    }
+
+    .header-center { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+
+    /* ── System health indicator ── */
+    .health-row { display: flex; align-items: center; gap: 7px; }
+    .health-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--text-quaternary);
+      transition: all 0.4s ease;
+    }
+    .health-dot.on  { background: var(--success); box-shadow: 0 0 8px rgba(107,158,107,0.5); }
+    .health-dot.off { background: var(--danger);   box-shadow: 0 0 8px rgba(196,92,92,0.5); }
+    .health-label { font-size: 11px; color: var(--text-tertiary); font-weight: 500; }
+
+    /* ── API status badges ── */
+    .api-badges { display: flex; gap: 6px; }
+    .api-badge {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
+      padding: 3px 8px; border-radius: 5px; cursor: default;
+      border: 1px solid transparent; transition: all 0.2s;
+      font-family: var(--mono);
+    }
+    .api-badge.ok     { background: var(--accent-dim); color: var(--accent); border-color: var(--accent-border); }
+    .api-badge.warn   { background: rgba(255,255,255,0.08); color: var(--warn); border-color: rgba(255,255,255,0.22); }
+    .api-badge.err    { background: rgba(196,92,92,0.1); color: var(--danger); border-color: rgba(196,92,92,0.25); }
+    .api-badge.dim    { background: rgba(255,255,255,0.04); color: var(--text-tertiary); border-color: var(--border); }
+
+    .header-actions { display: flex; align-items: center; gap: 8px; margin-left: 12px; }
+    .icon-btn {
+      width: 32px; height: 32px; border-radius: 10px; flex-shrink: 0;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10);
+      color: var(--text-secondary); cursor: pointer; padding: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+      position: relative;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.07);
+      -webkit-appearance: none; appearance: none;
+    }
+    .icon-btn:hover { background: rgba(255, 255, 255, 0.12); border-color: rgba(255, 255, 255, 0.28); color: var(--accent); }
+    .icon-btn svg { width: 16px; height: 16px; display: block; }
+
+    /* ── Layout ── */
+    .workspace {
+      display: flex; padding-top: var(--header-h);
+      min-height: 100vh; position: relative; z-index: 1;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: var(--sidebar-w); flex-shrink: 0;
+      position: fixed; top: var(--header-h); bottom: 0; left: 0;
+      background: rgba(10, 10, 12, 0.80);
+      backdrop-filter: blur(24px) saturate(170%);
+      -webkit-backdrop-filter: blur(24px) saturate(170%);
+      border-right: 1px solid var(--border-glass);
+      overflow-y: auto; z-index: 100;
+      padding: 24px 14px;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .sidebar::-webkit-scrollbar { width: 3px; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .nav-group { margin-bottom: 4px; }
+    .nav-group-label {
+      font-size: 9.5px; font-weight: 700; letter-spacing: 0.14em;
+      color: var(--text-tertiary); text-transform: uppercase;
+      padding: 0 10px 6px; display: block;
+    }
+    .nav-btn {
+      display: flex; align-items: center; gap: 10px;
+      width: 100%; background: transparent; border: none; cursor: pointer;
+      font-family: var(--font); font-size: 13px; font-weight: 500;
+      color: var(--text-secondary); padding: 9px 10px;
+      border-radius: 9px; text-align: left;
+      transition: all 0.18s ease;
+    }
+    .nav-btn svg { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.7; }
+    .nav-btn:hover {
+      color: rgba(245, 240, 232, 0.85); background: rgba(255,255,255,0.05);
+    }
+    .nav-btn.on {
+      color: var(--accent); background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 1px 0 rgba(255,255,255,0.06) inset;
+    }
+    .nav-btn.on svg { opacity: 1; }
+
+    .sidebar-divider {
+      height: 1px; background: rgba(255,255,255,0.05);
+      margin: 8px 4px;
+    }
+
+    /* ── Content area ── */
+    .content-wrap {
+      margin-left: var(--sidebar-w); flex: 1;
+      display: flex; flex-direction: column; min-height: calc(100vh - var(--header-h));
+    }
+    .main {
+      flex: 1; padding: 32px 28px 60px;
+      max-width: 1100px; width: 100%;
+    }
+
+    /* ── Page header / hero ── */
+    .page-hero {
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .page-hero h1 {
+      font-family: var(--display); font-size: 28px; font-weight: 600;
+      color: var(--text-primary); letter-spacing: -0.02em;
+    }
+    .page-hero p { font-size: 13px; color: var(--text-tertiary); margin-top: 6px; letter-spacing: 0.01em; }
+
+    /* ── Grid layouts ── */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .span-2 { grid-column: 1 / -1; }
+    @media (max-width: 820px) { .grid-2 { grid-template-columns: 1fr; } .span-2 { grid-column: auto; } }
+
+    /* ── Cards (large frosted panels) ── */
+    .card {
+      background: rgba(22, 22, 26, 0.72);
+      border: 1px solid var(--border-glass);
+      border-radius: 22px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 18px 50px rgba(0,0,0,0.45);
+      padding: 24px;
+      transition: transform 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94), border-color 0.22s ease, box-shadow 0.22s ease;
+      position: relative; overflow: hidden;
+      display: flex; flex-direction: column;
+      contain: layout paint;
+    }
+    @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+      .card {
+        background: rgba(255, 255, 255, 0.045);
+        backdrop-filter: blur(22px) saturate(170%);
+        -webkit-backdrop-filter: blur(22px) saturate(170%);
+      }
+    }
+    .card::before { display: none; }
+    .card:hover {
+      border-color: rgba(255, 255, 255, 0.16);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), 0 24px 60px rgba(0,0,0,0.55);
+      transform: translateY(-2px);
+    }
+    .card > .btn-block,
+    .card > .form-row { margin-top: auto; }
+
+    .card-head {
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 20px;
+    }
+    .card-icon {
+      width: 40px; height: 40px; border-radius: 12px;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      color: var(--accent);
+    }
+    .card-icon svg { width: 18px; height: 18px; }
+    .card-title  { font-size: 15px; font-weight: 600; color: var(--text-primary); letter-spacing: -0.01em; }
+    .card-desc   { font-size: 12.5px; color: var(--text-tertiary); margin-top: 2px; }
+
+    /* ── Forms ── */
+    .field {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      border-radius: 12px; color: var(--text-primary);
+      font-family: var(--font); font-size: 14px;
+      padding: 13px 16px; outline: none;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.25);
+    }
+    .field::placeholder { color: var(--text-tertiary); }
+    .field:focus {
+      background: rgba(255, 255, 255, 0.07);
+      border-color: rgba(255, 255, 255, 0.40);
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.10), inset 0 1px 2px rgba(0,0,0,0.25);
+    }
+    select.field {
+      cursor: pointer; appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='rgba(255,255,255,0.3)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px;
+    }
+    select.field option { background: #1a1a1a; color: var(--text-primary); }
+
+    .form-stack { display: flex; flex-direction: column; gap: 10px; }
+    .form-row   { display: flex; gap: 10px; }
+    @media (max-width: 500px) { .form-row { flex-direction: column; } }
+
+    /* ── PDF crack upload zones (compact, side-by-side labels) ── */
+    .pdf-crack-zones { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+
+    /* ── Buttons ── */
+    .btn {
+      background: rgba(255, 255, 255, 0.09);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 14px;
+      color: var(--text-primary); cursor: pointer;
+      font-family: var(--font); font-size: 13.5px; font-weight: 600;
+      padding: 12px 20px;
+      transition: transform 0.14s cubic-bezier(0.25, 0.46, 0.45, 0.94), background 0.14s ease, border-color 0.14s ease;
+      white-space: nowrap; letter-spacing: 0.01em;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), 0 6px 18px rgba(0,0,0,0.25);
+    }
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.32);
+      transform: translateY(-1px);
+    }
+    .btn:active { transform: scale(0.98); opacity: 0.92; }
+    .btn:focus-visible, .icon-btn:focus-visible, .nav-btn:focus-visible, .field:focus-visible, .dork-go:focus-visible {
+      outline: 2px solid rgba(255,255,255,0.55); outline-offset: 2px;
+    }
+    .btn-block  { width: 100%; }
+    .btn-ghost {
+      background: rgba(255,255,255,0.04);
+      color: var(--text-secondary); border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 1px 0 rgba(255,255,255,0.05) inset;
+    }
+    .btn-ghost:hover { background: rgba(255,255,255,0.08); color: var(--text-primary); box-shadow: none; }
+
+    .field-error {
+      font-size: 11.5px; color: var(--red); margin-top: 5px; margin-left: 2px;
+      display: none; animation: shake 0.35s ease;
+    }
+    .field-error.visible { display: block; }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)} }
+
+    .note {
+      font-size: 12.5px; color: var(--text-secondary); line-height: 1.6;
+      padding: 12px 14px; border-radius: 12px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      margin-bottom: 14px;
+    }
+
+    /* ── Loader ── */
+    .loader { display: none; align-items: center; gap: 9px; font-size: 12.5px; color: var(--accent); padding-top: 12px; font-weight: 500; }
+    .loader.visible { display: flex; }
+    .spin {
+      width: 14px; height: 14px;
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      border-top-color: var(--accent);
+      border-radius: 50%; animation: spin 0.75s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Results ── */
+    .result { display: none; margin-top: 20px; }
+    .result.visible { display: block; animation: fadeUp 0.3s cubic-bezier(0.16,1,0.3,1) forwards; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+    .res-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 14px; padding: 16px 18px;
+      box-shadow: 0 1px 0 rgba(255,255,255,0.04) inset;
+    }
+    .res-title { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
+    .res-sub   { font-size: 12.5px; color: var(--text-tertiary); margin-top: 3px; }
+
+    .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+    @media (max-width: 600px) { .data-grid { grid-template-columns: 1fr; } }
+
+    .panel {
+      background: rgba(0,0,0,0.28);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 14px; padding: 16px;
+    }
+    .panel-label {
+      font-size: 10.5px; font-weight: 700; color: var(--text-tertiary);
+      text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;
+    }
+    .kv { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; font-size: 13px; }
+    .kv + .kv { border-top: 1px solid rgba(255,255,255,0.03); }
+    .kv-k { color: var(--text-secondary); }
+    .kv-v { color: var(--text-primary); font-weight: 500; text-align: right; max-width: 58%; word-break: break-all; }
+    .kv-v.mono { font-family: var(--mono); font-size: 12px; }
+
+    /* ── Terminal output box ── */
+    .term-box {
+      background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 14px; font-family: var(--mono); font-size: 12.5px;
+      line-height: 1.65; color: rgba(245, 245, 247, 0.85);
+      max-height: 280px; overflow-y: auto; padding: 14px 16px;
+      white-space: pre-wrap; word-break: break-all;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4) inset;
+    }
+    .term-box::-webkit-scrollbar { width: 5px; }
+    .term-box::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 3px; }
+
+    /* ── Badges / Pills ── */
+    .pill {
+      display: inline-flex; align-items: center; font-size: 11px;
+      font-weight: 700; padding: 3px 9px; border-radius: 6px;
+      letter-spacing: 0.03em; text-transform: uppercase;
+    }
+    .pill-green  { background: rgba(107,158,107,0.12); color: var(--success); border: 1px solid rgba(107,158,107,0.25); }
+    .pill-red    { background: rgba(196,92,92,0.12); color: var(--danger);   border: 1px solid rgba(196,92,92,0.25); }
+    .pill-orange { background: var(--accent-dim); color: var(--warn); border: 1px solid var(--accent-border); }
+    .pill-accent { background: var(--accent-dim); color: var(--accent); border: 1px solid var(--accent-border); }
+    .pill-dim    { background: rgba(255,255,255,0.06);color: var(--text-secondary); border: 1px solid var(--border); }
+
+    /* ── Stats ── */
+    .stats { display: flex; gap: 10px; margin-bottom: 18px; }
+    .stat {
+      flex: 1; text-align: center;
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 14px; padding: 16px 8px;
+      box-shadow: 0 1px 0 rgba(255,255,255,0.04) inset;
+    }
+    .stat-n { font-size: 28px; font-weight: 700; line-height: 1; letter-spacing: -0.02em; }
+    .stat-l { font-size: 10px; color: var(--text-tertiary); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
+    @media (max-width: 500px) { .stats { flex-wrap: wrap; } .stat { min-width: calc(50% - 5px); } }
+
+    /* ── Chips ── */
+    .chips { display: flex; flex-wrap: wrap; gap: 7px; }
+    .chip {
+      display: inline-flex; align-items: center; gap: 7px;
+      font-size: 13px; font-weight: 500; padding: 7px 12px;
+      border-radius: 9px; text-decoration: none;
+      transition: all 0.18s ease;
+    }
+    .chip:hover { transform: translateY(-1px); filter: brightness(1.1); }
+    .chip-hit  { background: rgba(107,158,107,0.08); color: var(--text-primary); border: 1px solid rgba(107,158,107,0.22); }
+    .chip-miss { background: rgba(255,255,255,0.03); color: var(--text-secondary); border: 1px solid var(--border); }
+    .cdot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .chip-hit  .cdot { background: var(--success); box-shadow: 0 0 6px rgba(107,158,107,0.4); }
+    .chip-miss .cdot { background: var(--text-tertiary); }
+
+    .sub-label { font-size: 10.5px; font-weight: 700; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 9px; }
+
+    /* ── JSON toggle ── */
+    .json-toggle {
+      font-size: 11.5px; font-weight: 500; color: var(--text-tertiary); cursor: pointer;
+      background: none; border: none; font-family: var(--font);
+      padding: 0; transition: color 0.2s;
+    }
+    .json-toggle:hover { color: var(--accent); }
+    .json-box {
+      display: none; margin-top: 10px;
+      background: rgba(0, 0, 0, 0.45); border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px; font-family: var(--mono); font-size: 11.5px;
+      line-height: 1.65; color: var(--text-secondary);
+      max-height: 240px; overflow-y: auto; padding: 14px;
+      white-space: pre-wrap; word-break: break-all;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.35) inset;
+    }
+    .copy-small {
+      font-size: 10.5px; font-weight: 600; color: var(--text-tertiary); cursor: pointer;
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+      border-radius: 5px; padding: 3px 9px; font-family: var(--font);
+      display: none; transition: all 0.2s;
+    }
+    .copy-small:hover { background: var(--accent-dim); color: var(--accent); border-color: var(--accent-border); }
+
+    /* ── Dorking ── */
+    .dork-row select, .dork-row input {
+      background: transparent; border: none; color: var(--text-primary);
+      font-family: var(--font); font-size: 13.5px; padding: 12px 14px; outline: none;
+    }
+    .dork-row select { border-right: 1px solid var(--border); flex-shrink: 0; }
+    .dork-row input  { flex: 1; min-width: 0; }
+    .dork-row input::placeholder { color: var(--text-tertiary); }
+    .dork-row .dork-go {
+      background: var(--accent-dim); border: none; color: var(--accent);
+      padding: 0 18px; cursor: pointer; display: flex; align-items: center;
+      border-left: 1px solid var(--accent-border);
+      transition: background 0.2s;
+    }
+    .dork-row .dork-go:hover { background: rgba(255, 255, 255, 0.2); }
+    .dork-preview {
+      margin-top: 10px; padding: 14px; border-radius: 12px;
+      background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06);
+    }
+    .dork-preview-l { font-size: 10.5px; font-weight: 700; color: var(--text-tertiary); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.08em; }
+    .dork-preview-v { font-family: var(--mono); font-size: 12px; color: var(--accent); word-break: break-all; }
+
+    /* ── Breach item ── */
+    .breach-item {
+      background: rgba(214,96,94,0.04); border: 1px solid rgba(214,96,94,0.15);
+      border-left: 3px solid rgba(214,96,94,0.6);
+      border-radius: 0 12px 12px 0; padding: 18px; margin-bottom: 10px;
+    }
+    .breach-name { font-size: 14px; font-weight: 600; }
+    .breach-desc { font-size: 12.5px; color: var(--text-secondary); margin-top: 6px; line-height: 1.55; }
+    .breach-meta { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 10px; font-size: 12px; color: var(--text-tertiary); }
+    .breach-meta strong { color: var(--text-primary); font-weight: 600; }
+    .breach-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+    .breach-tag { font-size: 10.5px; font-weight: 600; background: rgba(214,96,94,0.1); color: rgba(224,150,148,0.9); padding: 2px 7px; border-radius: 5px; }
+
+    /* ── Tally progress bars ── */
+    .tally-panel {
+      background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px; padding: 20px; margin-bottom: 20px;
+      display: flex; flex-direction: column; gap: 18px;
+      box-shadow: 0 1px 0 rgba(255,255,255,0.04) inset;
+    }
+    .tally-row { display: flex; align-items: center; gap: 14px; font-family: var(--mono); }
+    .tally-label { font-size: 10.5px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.1em; display: flex; align-items: center; gap: 7px; width: 150px; flex-shrink: 0; }
+    .tally-dot  { width: 6px; height: 6px; border-radius: 50%; }
+    .abuse-dot  { background: var(--green); box-shadow: 0 0 5px rgba(95,179,122,0.45); }
+    .vt-dot     { background: var(--text-secondary); box-shadow: 0 0 5px rgba(255,255,255,0.18); }
+    .tally-pct  { font-size: 15px; font-style: italic; font-weight: 600; color: var(--text-primary); width: 44px; text-align: right; flex-shrink: 0; }
+    .tally-bar  { flex: 1; height: 2px; background: rgba(255,255,255,0.08); position: relative; border-radius: 2px; }
+    .tally-fill { position: absolute; top: 0; left: 0; bottom: 0; background: linear-gradient(90deg, rgba(255,255,255,0.25), var(--accent)); border-radius: 2px; transition: width 0.5s ease; }
+    .tally-thumb { position: absolute; top: 50%; width: 9px; height: 9px; background: var(--accent); border-radius: 50%; transform: translate(-50%,-50%); box-shadow: 0 0 6px var(--accent); transition: left 0.5s ease; }
+    .tally-info { font-size: 11px; color: var(--text-secondary); width: 160px; text-align: left; flex-shrink: 0; }
+    @media (max-width: 768px) { .tally-row { flex-wrap: wrap; } .tally-info { width: 100%; text-align: right; } .tally-label { width: auto; } }
+
+    /* ── Crack progress ── */
+    .crack-progress { display: none; margin-top: 12px; padding: 16px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; }
+    .crack-progress.visible { display: block; }
+    .crack-progress-bar { height: 4px; background: rgba(255,255,255,0.06); border-radius: 4px; overflow: hidden; margin: 10px 0 8px; }
+    .crack-progress-fill { height: 100%; background: linear-gradient(90deg, rgba(255,255,255,0.45), rgba(255,255,255,0.85)); border-radius: 4px; transition: width 0.5s ease; width: 0%; box-shadow: 0 0 8px rgba(255,255,255,0.25); }
+    .crack-progress-line { font-family: var(--mono); font-size: 11.5px; color: var(--accent); line-height: 1.5; word-break: break-word; }
+
+    /* ── Vault modal ── */
+    .vault-overlay {
+      position: fixed; inset: 0; z-index: 2000;
+      background: rgba(0,0,0,0.65); backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      display: flex; align-items: flex-start; justify-content: center;
+      padding-top: 10vh; opacity: 0; pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .vault-overlay.visible { opacity: 1; pointer-events: auto; }
+    .vault-modal {
+      width: 100%; max-width: 460px;
+      background: rgba(18, 18, 22, 0.96);
+      backdrop-filter: blur(30px) saturate(170%);
+      -webkit-backdrop-filter: blur(30px) saturate(170%);
+      border: 1px solid var(--border-glass);
+      border-radius: 22px; padding: 28px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 24px 60px rgba(0,0,0,0.7);
+      transform: translateY(-16px);
+      transition: transform 0.3s cubic-bezier(0.16,1,0.3,1);
+      will-change: transform;
+    }
+    .vault-overlay.visible .vault-modal { transform: translateY(0); }
+    .vault-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .vault-title  { font-family: var(--display); font-size: 20px; font-weight: 700; color: var(--accent); letter-spacing: -0.01em; }
+    .vault-close  { background: none; border: none; color: var(--text-tertiary); cursor: pointer; transition: color 0.2s; }
+    .vault-close:hover { color: var(--text-primary); }
+
+    /* ── Welcome modal ── */
+    .welcome-overlay {
+      position: fixed; inset: 0; z-index: 6000;
+      background: rgba(0,0,0,0.72); backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 24px; opacity: 0; pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .welcome-overlay.visible { opacity: 1; pointer-events: auto; }
+    .welcome-modal {
+      width: 100%; max-width: 480px;
+      background: rgba(18, 18, 22, 0.82);
+      backdrop-filter: blur(36px) saturate(180%);
+      -webkit-backdrop-filter: blur(36px) saturate(180%);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 24px; padding: 32px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 28px 70px rgba(0,0,0,0.75);
+      transform: translateY(12px) scale(0.98);
+      transition: transform 0.35s cubic-bezier(0.16,1,0.3,1);
+    }
+    .welcome-overlay.visible .welcome-modal { transform: translateY(0) scale(1); }
+    .welcome-title { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 8px; }
+    .welcome-lead { font-size: 14px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 18px; }
+    .welcome-list { margin: 0 0 22px 18px; padding: 0; color: var(--text-secondary); font-size: 13.5px; line-height: 1.65; }
+    .welcome-list li { margin-bottom: 6px; }
+    .welcome-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .welcome-footer { margin-top: 18px; font-size: 12px; color: var(--text-tertiary); line-height: 1.5; }
+
+    /* ── Case mode modal ── */
+    .case-mode-overlay {
+      position: fixed; inset: 0; z-index: 6500;
+      background: rgba(0,0,0,0.72); backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 24px; opacity: 0; pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .case-mode-overlay.visible { opacity: 1; pointer-events: auto; }
+    .case-mode-modal {
+      width: 100%; max-width: 520px;
+      background: rgba(18, 18, 22, 0.82);
+      backdrop-filter: blur(36px) saturate(180%);
+      -webkit-backdrop-filter: blur(36px) saturate(180%);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 24px; padding: 32px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 28px 70px rgba(0,0,0,0.75);
+      transform: translateY(12px) scale(0.98);
+      transition: transform 0.35s cubic-bezier(0.16,1,0.3,1);
+    }
+    .case-mode-overlay.visible .case-mode-modal { transform: translateY(0) scale(1); }
+    .case-mode-title { font-family: var(--display); font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+    .case-mode-lead { font-size: 13px; color: var(--text-secondary); line-height: 1.55; margin-bottom: 20px; }
+    .case-mode-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+    .case-mode-form { display: none; margin-top: 8px; }
+    .case-mode-form.visible { display: block; }
+    .case-mode-tabs { display: flex; gap: 8px; margin-bottom: 14px; }
+    .case-mode-tab {
+      padding: 6px 12px; font-size: 11px; border-radius: 8px; cursor: pointer;
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border-glass); color: var(--text-secondary);
+    }
+    .case-mode-tab.on { background: rgba(255,255,255,0.1); color: var(--text-primary); border-color: rgba(255,255,255,0.2); }
+    .case-mode-field { margin-bottom: 10px; }
+    .case-mode-field label { display: block; font-size: 11px; color: var(--text-tertiary); margin-bottom: 4px; }
+    .case-mode-field input, .case-mode-field select {
+      width: 100%; padding: 9px 12px; border-radius: 10px;
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border-glass);
+      color: var(--text-primary); font-size: 13px;
+    }
+    .case-mode-field input:focus, .case-mode-field select:focus {
+      outline: none; border-color: rgba(255,255,255,0.28);
+    }
+    .case-mode-required { color: var(--danger); }
+    /* ── Truecaller phone opt-in modal (reuses case-mode shell) ── */
+    .tc-phone-setup { display: none; margin-top: 8px; }
+    .tc-phone-setup.visible { display: block; }
+    .tc-phone-steps {
+      font-size: 12px; color: var(--text-secondary); line-height: 1.55;
+      margin: 0 0 14px 18px; padding: 0;
+    }
+    .tc-phone-steps li { margin-bottom: 4px; }
+    .tc-phone-steps code { font-family: var(--mono); font-size: 11px; color: var(--accent); }
+    .settings-tabs { display: flex; gap: 6px; margin-bottom: 18px; flex-wrap: wrap; }
+    .settings-tab {
+      font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
+      padding: 6px 12px; border-radius: 8px; cursor: pointer;
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border-glass);
+      color: var(--text-tertiary); transition: background 0.18s, color 0.18s, border-color 0.18s;
+    }
+    .settings-tab.on { background: rgba(255,255,255,0.12); color: var(--text-primary); border-color: rgba(255,255,255,0.22); }
+    .settings-panel { display: none; }
+    .settings-panel.visible { display: block; }
+    .user-list { margin-top: 12px; max-height: 180px; overflow-y: auto; }
+    .user-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 12.5px; }
+    .user-row .mono { font-family: var(--mono); color: var(--accent); }
+
+    /* ── Sections ── */
+    .section { display: none; }
+    .section.active { display: block; animation: fadeUp 0.35s cubic-bezier(0.16,1,0.3,1) forwards; }
+
+    /* ── Tooltip ── */
+    .tooltip-container { position: relative; display: inline-block; }
+    .tooltip-container .tooltip-text {
+      opacity: 0; pointer-events: none;
+      background: rgba(20,20,24,0.98); color: var(--text-primary);
+      border: 1px solid var(--border-glass);
+      border-radius: 6px; padding: 5px 10px;
+      position: absolute; z-index: 10050;
+      top: 130%; left: 50%;
+      transform: translateX(-50%) translateY(-4px);
+      transition: opacity 0.2s, transform 0.2s;
+      font-size: 11px; white-space: nowrap;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+    .tooltip-container:hover .tooltip-text { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── Tour (GPU-composited: transform + opacity only) ── */
+    .tour-overlay {
+      position: fixed; inset: 0; z-index: 10000;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    .tour-overlay.visible { opacity: 1; pointer-events: auto; }
+    .tour-spotlight {
+      position: fixed; top: 0; left: 0; width: 0; height: 0; z-index: 10001;
+      border-radius: 16px; pointer-events: none; opacity: 0;
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.55), 0 0 0 9999px rgba(0,0,0,0.62);
+      transform: translate3d(0,0,0);
+      transition: transform 0.36s cubic-bezier(0.22,1,0.36,1), opacity 0.25s ease;
+      will-change: transform;
+    }
+    .tour-tooltip {
+      position: fixed; top: 0; left: 0; z-index: 10002;
+      width: 340px; max-width: calc(100vw - 24px);
+      background: rgba(20, 20, 24, 0.96);
+      border: 1px solid var(--border-glass);
+      border-radius: 18px; padding: 20px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 24px 60px rgba(0,0,0,0.6);
+      font-family: var(--font);
+      opacity: 0; pointer-events: none;
+      transform: translate3d(0,0,0);
+      transition: transform 0.32s cubic-bezier(0.22,1,0.36,1), opacity 0.25s ease;
+      will-change: transform;
+    }
+    @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+      .tour-tooltip { background: rgba(28,28,32,0.78); backdrop-filter: blur(30px) saturate(170%); -webkit-backdrop-filter: blur(30px) saturate(170%); }
+    }
+    .tour-tooltip.visible { opacity: 1; pointer-events: auto; }
+    .tour-tooltip:focus { outline: none; }
+    .tour-title { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; letter-spacing: -0.01em; }
+    .tour-desc  { font-size: 13px; color: var(--text-secondary); line-height: 1.55; margin-bottom: 16px; }
+    .tour-footer { display: flex; justify-content: space-between; align-items: center; }
+    .tour-dots  { display: flex; gap: 4px; }
+    .tour-dot   { width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,0.18); transition: background 0.3s, transform 0.3s; }
+    .tour-dot.active { background: var(--accent); transform: scale(1.25); }
+    .tour-btn   { background: var(--accent-dim); border: 1px solid var(--accent-border); border-radius: 8px; color: var(--text-primary); font-size: 12px; font-weight: 600; padding: 6px 12px; cursor: pointer; transition: background 0.18s, border-color 0.18s; }
+    .tour-btn:hover { background: rgba(255, 255, 255, 0.18); border-color: rgba(255,255,255,0.3); }
+    .tour-btn-skip { background: transparent; border: none; color: var(--text-tertiary); font-size: 12px; cursor: pointer; padding: 6px 0; }
+    .tour-btn-skip:hover { color: var(--text-primary); }
+    @media (prefers-reduced-motion: reduce) {
+      .tour-overlay, .tour-spotlight, .tour-tooltip { transition: none !important; }
+      .section.active { animation: none !important; }
+      .result.visible { animation: none !important; }
+    }
+
+    /* ── Toasts ── */
+    .toasts { position: fixed; top: 16px; right: 16px; z-index: 3000; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+    .toast-item {
+      background: rgba(10,10,10,0.95); backdrop-filter: blur(30px) saturate(180%);
+      -webkit-backdrop-filter: blur(30px) saturate(180%);
+      border: 1px solid rgba(255,255,255,0.08); border-radius: 12px;
+      padding: 12px 18px; font-size: 13.5px; font-weight: 500; color: var(--text-primary);
+      pointer-events: auto; box-shadow: 0 1px 0 rgba(255,255,255,0.06) inset, 0 10px 30px rgba(0,0,0,0.5);
+      animation: toast-in 0.3s cubic-bezier(0.16,1,0.3,1);
+    }
+    .toast-item.err { border-left: 3px solid var(--red); }
+    .toast-item.ok  { border-left: 3px solid var(--green); }
+    .toast-item.warn { border-left: 3px solid var(--orange); }
+    @keyframes toast-in  { from{opacity:0;transform:translateY(-10px) scale(0.95)} to{opacity:1;transform:translateY(0) scale(1)} }
+    @keyframes toast-out { from{opacity:1;transform:scale(1)} to{opacity:0;transform:scale(0.95)} }
+
+    /* ── Footer ── */
+    .footer {
+      padding: 20px 28px; font-size: 12px; color: var(--text-tertiary);
+      border-top: 1px solid rgba(255,255,255,0.04);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .footer a { color: var(--accent); text-decoration: none; }
+
+    /* ── Upload Zones ── */
+    .upload-zone {
+      border: 1.5px dashed rgba(255, 255, 255, 0.25);
+      border-radius: 16px;
+      padding: 26px 20px;
+      text-align: center;
+      cursor: pointer;
+      background: rgba(255,255,255,0.02);
+      transition: all 0.2s ease;
+      width: 100%;
+    }
+    .upload-zone:hover {
+      border-color: rgba(255, 255, 255, 0.5);
+      background: rgba(255, 255, 255, 0.04);
+    }
+    .upload-zone.has-file {
+      border-style: solid;
+      border-color: rgba(107, 158, 107, 0.4);
+      background: rgba(107, 158, 107, 0.04);
+    }
+    .upload-icon { font-size: 26px; margin-bottom: 10px; line-height: 1; }
+    .upload-title { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+    .upload-hint { font-size: 12px; color: var(--text-tertiary); margin-bottom: 8px; line-height: 1.5; }
+    .upload-name { font-size: 11.5px; font-family: var(--mono); color: var(--accent); opacity: 0.75; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+    .upload-zone.has-file .upload-name { color: var(--success); opacity: 1; }
+    /* Compact inline variant for PDF crack card */
+    .upload-zone--compact {
+      padding: 12px 14px; border-radius: 12px; text-align: left;
+      display: flex; flex-direction: column; gap: 2px;
+    }
+    .upload-zone--compact .upload-icon { font-size: 18px; margin-bottom: 0; display: inline; }
+    .upload-zone--compact .upload-title { font-size: 13.5px; margin-bottom: 0; display: inline; vertical-align: middle; margin-left: 6px; }
+    .upload-zone--compact .upload-hint { font-size: 11.5px; margin-bottom: 0; margin-top: 3px; }
+    .upload-zone--compact .upload-name { font-size: 11px; margin-top: 4px; }
+    .upload-zone--optional {
+      background: rgba(255,255,255,0.015);
+      border-color: rgba(255,255,255,0.09);
+    }
+    .upload-zone--optional:hover {
+      border-color: rgba(255,255,255,0.22);
+      background: rgba(255,255,255,0.035);
+    }
+    .upload-zone--optional.has-file {
+      border-color: rgba(255, 255, 255, 0.35);
+      background: rgba(255, 255, 255, 0.04);
+    }
+    .upload-optional-tag {
+      font-size: 10.5px; font-weight: 400; color: var(--text-tertiary);
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 5px; padding: 1px 5px; margin-left: 5px; vertical-align: middle;
+    }
+
+    /* ── Dorking row refinement ── */
+    .dork-row {
+      display: flex; border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px; overflow: hidden;
+      background: rgba(0,0,0,0.3);
+      transition: all 0.2s ease;
+    }
+    .dork-row:focus-within { border-color: rgba(255, 255, 255, 0.35); box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08); }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.25); }
+
+    /* ── Responsive: collapse sidebar on small screens ── */
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .content-wrap { margin-left: 0; }
+      .main { padding: 20px 16px 40px; }
+    }
+
+    @media print {
+      .bg-layer, .header, .sidebar, .toasts { display: none !important; }
+      .content-wrap { margin-left: 0; }
+      body { background: #fff; color: #000; }
+    }
+
+    /* ── Profile overlay ── */
+    .profile-overlay {
+      position: fixed; inset: 0; z-index: 5000;
+      background: rgba(0,0,0,0.75); backdrop-filter: blur(24px);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .profile-overlay.hidden { display: none; }
+    .profile-card {
+      width: 100%; max-width: 440px; padding: 32px;
+      background: rgba(18,18,22,0.96); border: 1px solid var(--border-glass);
+      border-radius: 22px; box-shadow: var(--shadow);
+    }
+    .profile-title { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+    .profile-sub { font-size: 13px; color: var(--text-secondary); margin-bottom: 20px; line-height: 1.5; }
+    .profile-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; max-height: 220px; overflow-y: auto; }
+    .profile-btn {
+      text-align: left; padding: 12px 14px; border-radius: 12px; cursor: pointer;
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border-glass);
+      color: var(--text-primary); font-size: 14px; transition: background 0.15s;
+    }
+    .profile-btn:hover { background: rgba(255,255,255,0.08); border-color: var(--accent); }
+    .profile-btn-role { font-size: 11px; color: var(--text-tertiary); margin-left: 8px; }
+    .profile-divider { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-tertiary); margin: 16px 0 10px; }
+    .case-panel {
+      margin: 12px 10px; padding: 14px; border-radius: 14px;
+      background: rgba(255,255,255,0.03); border: 1px solid var(--border-glass);
+      font-size: 12px;
+    }
+    .case-panel h3 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-tertiary); margin-bottom: 8px; }
+    .case-panel.dimmed { opacity: 0.45; }
+    .case-active { font-family: var(--mono); font-size: 11px; color: var(--accent); word-break: break-all; }
+    .tor-pill {
+      font-size: 10px; padding: 4px 10px; border-radius: 20px;
+      background: rgba(255,255,255,0.06); border: 1px solid var(--border-glass);
+      color: var(--text-tertiary); white-space: nowrap;
+    }
+    .export-btn {
+      font-size: 11px; padding: 5px 10px; border-radius: 8px; cursor: pointer;
+      background: rgba(255,255,255,0.06); border: 1px solid var(--border-glass);
+      color: var(--text-secondary); margin-left: auto;
+    }
+    .export-btn:hover { background: rgba(255,255,255,0.1); color: var(--text-primary); }
+  </style>
+</head>
+
+<body>
+
+  <!-- Investigator profile overlay -->
+  <div id="profileOverlay" class="profile-overlay hidden">
+    <div class="profile-card glass-panel">
+      <div class="profile-title">Select Investigator Profile</div>
+      <div class="profile-sub" id="leaNotice">Authorized law enforcement use only. Pick your profile once per session — no passwords.</div>
+      <div id="profileList" class="profile-list"></div>
+      <div class="profile-divider">Add new profile</div>
+      <div class="form-stack">
+        <input id="newProfileName" class="field" placeholder="Display name" autocomplete="name" />
+        <select id="newProfileRole" class="field" style="cursor:pointer">
+          <option value="investigator">Investigator</option>
+          <option value="supervisor">Supervisor</option>
+          <option value="admin">Admin</option>
+        </select>
+        <button class="btn btn-block" type="button" onclick="createAndSelectProfile()">Add &amp; Use Profile</button>
+      </div>
+      <div id="ackBlock" style="display:none;margin-top:16px">
+        <label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;color:var(--text-secondary)">
+          <input type="checkbox" id="leaAckCheck" style="margin-top:3px"/>
+          I acknowledge this system is for authorized law enforcement use only and I have valid legal authority.
+        </label>
+        <button class="btn btn-block" style="margin-top:10px" onclick="doAcknowledge()">Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Session case mode modal (asked once per browser tab session) -->
+  <div id="caseModeModal" class="case-mode-overlay" role="dialog" aria-modal="true" aria-labelledby="caseModeTitle">
+    <div class="case-mode-modal glass-panel">
+      <div id="caseModeChoice">
+        <h2 class="case-mode-title" id="caseModeTitle">Investigation Case Mode</h2>
+        <p class="case-mode-lead">
+          <strong>Enable Case Mode</strong> — log all actions to a case file; export evidence later.<br/>
+          <strong>Continue Without Case</strong> — use all tools freely; no per-case audit file is created.
+        </p>
+        <div class="case-mode-actions">
+          <button class="btn" type="button" id="caseModeEnableBtn">Enable Case Mode</button>
+          <button class="btn btn-ghost" type="button" id="caseModeSkipBtn">Continue Without Case</button>
+        </div>
+      </div>
+      <div id="caseModeForm" class="case-mode-form">
+        <h2 class="case-mode-title">Set Up Investigation Case</h2>
+        <div class="case-mode-tabs">
+          <button type="button" class="case-mode-tab on" id="caseTabNew" onclick="switchCaseTab('new')">New case</button>
+          <button type="button" class="case-mode-tab" id="caseTabExisting" onclick="switchCaseTab('existing')">Open existing</button>
+        </div>
+        <div id="caseFormNew">
+          <div class="case-mode-field">
+            <label>Case title <span class="case-mode-required">*</span></label>
+            <input id="cmTitle" type="text" placeholder="Investigation title" />
+          </div>
+          <div class="case-mode-field">
+            <label>Authorization reference (warrant/court order) <span class="case-mode-required">*</span></label>
+            <input id="cmAuthRef" type="text" placeholder="Warrant or court order number" />
+          </div>
+          <div class="case-mode-field">
+            <label>Lead investigator</label>
+            <input id="cmLead" type="text" placeholder="Defaults to signed-in user" />
+          </div>
+          <div class="case-mode-field">
+            <label>Legal basis (optional)</label>
+            <input id="cmLegal" type="text" placeholder="Statutory authority, etc." />
+          </div>
+        </div>
+        <div id="caseFormExisting" style="display:none">
+          <div class="case-mode-field">
+            <label>Open case</label>
+            <select id="cmExistingSelect"><option value="">Loading cases…</option></select>
+          </div>
+        </div>
+        <div class="case-mode-actions" style="margin-top:16px">
+          <button class="btn" type="button" id="caseModeSubmitBtn" onclick="submitCaseModeForm()">Activate Case</button>
+          <button class="btn btn-ghost" type="button" onclick="continueWithoutCase()">Back</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Truecaller opt-in (once per browser tab session) -->
+  <div id="tcPhoneModal" class="case-mode-overlay" role="dialog" aria-modal="true" aria-labelledby="tcPhoneTitle">
+    <div class="case-mode-modal glass-panel">
+      <div id="tcPhoneChoice">
+        <h2 class="case-mode-title" id="tcPhoneTitle">Truecaller Deep Lookup</h2>
+        <p class="case-mode-lead">
+          Enable <strong>Truecaller</strong> for identity enrichment (name, email, spam score)?<br/>
+          Choose <strong>Offline only</strong> to trace carrier, region, and timezone via phonenumbers with no external lookup.
+        </p>
+        <div class="case-mode-actions">
+          <button class="btn" type="button" id="tcPhoneYesBtn">Yes — Enable Truecaller</button>
+          <button class="btn btn-ghost" type="button" id="tcPhoneNoBtn">No — Offline Only</button>
+        </div>
+      </div>
+      <div id="tcPhoneSetup" class="tc-phone-setup">
+        <h2 class="case-mode-title">Truecaller Setup</h2>
+        <p class="case-mode-lead">No installation ID in vault. Obtain one with truecallerjs:</p>
+        <ol class="tc-phone-steps">
+          <li><code>npx truecallerjs login</code></li>
+          <li><code>npx truecallerjs installation_id</code></li>
+          <li>Paste the ID below (saved to vault)</li>
+        </ol>
+        <div class="case-mode-field">
+          <label for="tcPhoneSetupInput">Installation ID</label>
+          <input id="tcPhoneSetupInput" type="password" placeholder="Paste installation ID…" />
+        </div>
+        <div class="case-mode-actions" style="margin-top:16px">
+          <button class="btn" type="button" id="tcPhoneSetupBtn">Save &amp; Trace</button>
+          <button class="btn btn-ghost" type="button" id="tcPhoneSetupSkipBtn">Trace Without ID</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ambient background -->
+  <div class="bg-layer">
+    <div class="bg-orb orb-1"></div>
+    <div class="bg-orb orb-2"></div>
+    <div class="bg-orb orb-3"></div>
+  </div>
+
+  <!-- First-visit welcome modal -->
+  <div id="welcomeModal" class="welcome-overlay" role="dialog" aria-modal="true" aria-labelledby="welcomeTitle" aria-describedby="welcomeDesc">
+    <div class="welcome-modal glass-panel">
+      <h2 class="welcome-title" id="welcomeTitle">Welcome to ARGUS</h2>
+      <p class="welcome-lead" id="welcomeDesc">Your law-enforcement OSINT workspace. Here is how to get started:</p>
+      <ul class="welcome-list">
+        <li>At session start, choose <strong>Investigation Case mode</strong> (yes/no) — optional for ad-hoc scans.</li>
+        <li>Pick a tool from the <strong>sidebar</strong> to run scans.</li>
+        <li><strong>Export evidence</strong> when case mode is enabled and you need chain-of-custody reports.</li>
+      </ul>
+      <div class="welcome-actions">
+        <button class="btn" type="button" id="welcomeStartTour">Start Tour</button>
+        <button class="btn btn-ghost" type="button" id="welcomeSkip">Skip</button>
+      </div>
+      <p class="welcome-footer">Press the <strong>?</strong> icon anytime to replay the tour.</p>
+    </div>
+  </div>
+
+  <!-- Settings / API Vault Modal -->
+  <div id="vaultModal" class="vault-overlay">
+    <div class="vault-modal">
+      <div class="vault-header">
+        <div class="vault-title">Settings</div>
+        <button class="vault-close" onclick="closeVault()" aria-label="Close Settings">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="settings-tabs" role="tablist">
+        <button class="settings-tab on" type="button" data-tab="keys" onclick="showSettingsTab('keys', this)">API Keys</button>
+        <button class="settings-tab" type="button" data-tab="account" onclick="showSettingsTab('account', this)">Profile</button>
+        <button class="settings-tab" type="button" data-tab="users" id="usersTabBtn" style="display:none" onclick="showSettingsTab('users', this)">Profiles</button>
+      </div>
+      <div id="settingsKeys" class="settings-panel visible">
+        <p style="font-size: 13.5px; color: var(--text-secondary); margin-bottom: 20px; line-height: 1.55;">
+          Configure API keys stored in the encrypted server vault. Keys are never written to source code.
+        </p>
+        <div class="form-stack">
+          <div>
+            <label for="abuseKey" class="sub-label">AbuseIPDB API Key</label>
+            <input type="password" id="abuseKey" class="field" placeholder="Enter your AbuseIPDB key…" />
+          </div>
+          <div>
+            <label for="vtKey" class="sub-label">VirusTotal API Key</label>
+            <input type="password" id="vtKey" class="field" placeholder="Enter your VirusTotal key…" />
+          </div>
+          <div>
+            <label for="tcVaultKey" class="sub-label">Truecaller Installation ID</label>
+            <input type="password" id="tcVaultKey" class="field" placeholder="Optional Truecaller ID…" />
+          </div>
+          <button class="btn btn-block" style="margin-top:8px;" onclick="saveVault()">Save & Lock Vault</button>
+        </div>
+      </div>
+      <div id="settingsAccount" class="settings-panel">
+        <p style="font-size: 13.5px; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.55;">
+          Your active investigator profile for this browser session. Audit logs and chain-of-custody exports are tagged with this name.
+        </p>
+        <div id="currentProfilePanel" class="panel">
+          <div class="kv"><span class="kv-k">Profile</span><span class="kv-v" id="currentProfileName">—</span></div>
+          <div class="kv"><span class="kv-k">Role</span><span class="kv-v" id="currentProfileRole">—</span></div>
+        </div>
+        <button class="btn btn-block" type="button" style="margin-top:12px" onclick="switchProfile()">Switch Profile</button>
+      </div>
+      <div id="settingsUsers" class="settings-panel">
+        <p style="font-size: 13.5px; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.55;">
+          Add investigator, supervisor, or admin profiles. No passwords — each analyst picks their profile at session start.
+        </p>
+        <div class="form-stack">
+          <input id="newUserName" class="field" placeholder="Display name" autocomplete="off" />
+          <select id="newUserRole" class="field" style="cursor:pointer">
+            <option value="investigator">Investigator</option>
+            <option value="supervisor">Supervisor</option>
+            <option value="admin">Admin</option>
+          </select>
+          <button class="btn btn-block" type="button" onclick="addUserAccount()">Add Profile</button>
+        </div>
+        <div class="sub-label" style="margin-top:18px">Existing profiles</div>
+        <div id="userListPanel" class="user-list"><div class="note">Loading…</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-icon">
+          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8" stroke-dasharray="2 3"/>
+            <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+          </svg>
+        </div>
+        <div class="logo-stack">
+          <span class="logo-name">ARGUS</span>
+          <span class="logo-sub">Intelligence Platform</span>
+        </div>
+      </div>
+
+      <div class="header-center">
+        <div class="health-row">
+          <div class="health-dot" id="hDot" aria-label="System Status"></div>
+          <span class="health-label" id="healthLabel">Connecting…</span>
+        </div>
+        <div class="api-badges" id="apiStatusBadges">
+          <span class="api-badge dim" id="badge-vt">VT</span>
+          <span class="api-badge dim" id="badge-abuse">ABUSE</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <span class="tor-pill" title="Tor routing is managed via CLI: tor on|off">Tor: managed via CLI</span>
+        <span class="classified-badge">LEA EDITION</span>
+        <button class="icon-btn" id="logoutBtn" onclick="doLogout()" aria-label="Switch profile" title="Switch profile" style="display:none">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+        </button>
+        <div class="tooltip-container">
+          <button class="icon-btn" id="vaultBtn" onclick="openVault()" aria-label="API Vault Settings">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+              <rect x="4" y="11" width="16" height="9" rx="2"/>
+              <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+              <circle cx="12" cy="15.5" r="1.25" fill="currentColor" stroke="none"/>
+            </svg>
+          </button>
+          <span class="tooltip-text">Settings &amp; API Keys</span>
+        </div>
+        <div class="tooltip-container">
+          <button class="icon-btn" id="tourBtn" onclick="startWebTour()" aria-label="Guided Tour">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+              <circle cx="12" cy="12" r="9"/>
+              <path d="M9.4 9.2a2.7 2.7 0 0 1 5.2 1c0 1.8-2.6 2.3-2.6 4"/>
+              <circle cx="12" cy="17" r="1.1" fill="currentColor" stroke="none"/>
+            </svg>
+          </button>
+          <span class="tooltip-text">Guided Tour</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="workspace">
+
+    <!-- Sidebar navigation -->
+    <aside class="sidebar">
+
+      <div class="case-panel" id="casePanel">
+        <h3>Investigation Case</h3>
+        <div class="case-active" id="caseActiveLabel">No active case</div>
+        <div style="margin-top:4px;font-size:11px;color:var(--text-tertiary)" id="caseAuthRef"></div>
+        <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
+          <button class="btn" style="padding:5px 10px;font-size:11px" onclick="showCaseModal()">Select</button>
+          <button class="btn btn-ghost" style="padding:5px 10px;font-size:11px" id="caseExportBtn" onclick="exportCaseReport()">Export Report</button>
+        </div>
+      </div>
+
+      <div class="nav-group">
+        <span class="nav-group-label">Identity</span>
+        <button class="nav-btn on" data-section="identity" onclick="go('identity',this)">
+          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+          Identity Intel
+        </button>
+        <button class="nav-btn" data-section="domain" onclick="go('domain',this)">
+          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          Domain Scan
+        </button>
+      </div>
+
+      <div class="sidebar-divider"></div>
+
+      <div class="nav-group">
+        <span class="nav-group-label">Passive Recon</span>
+        <button class="nav-btn" data-section="email" onclick="go('email',this)">
+          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          Email Footprint
+        </button>
+        <button class="nav-btn" data-section="breach" onclick="go('breach',this)">
+          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Breach Lookup
+        </button>
+        <button class="nav-btn" data-section="dork" onclick="go('dork',this)">
+          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          Dorking
+        </button>
+      </div>
+
+      <div class="sidebar-divider"></div>
+
+      <div class="nav-group">
+        <span class="nav-group-label">Threat Intel</span>
+        <button class="nav-btn" data-section="threat" onclick="go('threat',this)">
+          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          Threat Analysis
+        </button>
+      </div>
+
+      <div class="sidebar-divider"></div>
+
+      <div class="nav-group">
+        <span class="nav-group-label">Network</span>
+        <button class="nav-btn" data-section="network" onclick="go('network',this)">
+          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="2" width="6" height="6" rx="1"/><rect x="16" y="2" width="6" height="6" rx="1"/><rect x="9" y="16" width="6" height="6" rx="1"/><path d="M5 8v3a2 2 0 002 2h10a2 2 0 002-2V8M12 13v3"/></svg>
+          Network Tools
+        </button>
+      </div>
+
+      <div class="sidebar-divider"></div>
+
+      <div class="nav-group">
+        <span class="nav-group-label">Admin</span>
+        <button class="nav-btn" data-section="supervisor" onclick="go('supervisor',this)">
+          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 3v18h18M7 16l4-4 4 4 5-6"/></svg>
+          Supervisor
+        </button>
+        <button class="nav-btn" onclick="openVault()">
+          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>
+          API Keys
+        </button>
+      </div>
+
+      <div class="sidebar-divider"></div>
+
+      <div class="nav-group">
+        <span class="nav-group-label">Recon</span>
+        <button class="nav-btn" data-section="recon" onclick="go('recon',this)">
+          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          Advanced Recon
+        </button>
+      </div>
+
+      <div class="sidebar-divider"></div>
+
+      <div class="nav-group">
+        <span class="nav-group-label">Forensics</span>
+        <button class="nav-btn" data-section="files" onclick="go('files',this)">
+          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+          File Security
+        </button>
+      </div>
+
+    </aside>
+
+    <!-- Main content -->
+    <div class="content-wrap">
+      <main class="main" role="main">
+
+        <!-- 1. IDENTITY SECTION -->
+        <section id="s-identity" class="section active">
+          <div class="page-hero">
+            <h1>Identity Intelligence</h1>
+            <p>IP geolocation &amp; threat analysis · Telecom carrier tracing · Username footprinting across 600+ sites</p>
+          </div>
+          <div class="grid-2">
+
+            <!-- IP Lookup -->
+            <article class="card" id="c-ip">
+              <header class="card-head">
+                <div class="card-icon">
+                  <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                </div>
+                <div><h2 class="card-title">IP Intelligence Scan</h2><div class="card-desc">Geolocation · ASN · ISP · Threat score</div></div>
+              </header>
+              <div class="form-stack">
+                <div>
+                  <input id="ipInput" class="field" placeholder="e.g. 8.8.8.8 or 2001:4860:4860::8888" aria-label="IP Address" />
+                  <div id="ipErr" class="field-error"></div>
+                </div>
+                <button class="btn btn-block" onclick="runIP()">Run IP Scan</button>
+              </div>
+              <div id="ipLoad" class="loader"><span class="spin"></span>Querying global intelligence databases…</div>
+              <div id="ipRes" class="result"></div>
+            </article>
+
+            <!-- Phone Trace -->
+            <article class="card" id="c-phone">
+              <header class="card-head">
+                <div class="card-icon">
+                  <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.63 3.37 2 2 0 0 1 3.6 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.77a16 16 0 0 0 6.32 6.32l.95-.95a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                </div>
+                <div><h2 class="card-title">Telecom &amp; Carrier Trace</h2><div class="card-desc">Carrier · Region · Truecaller integration</div></div>
+              </header>
+              <div class="form-stack">
+                <div>
+                  <input id="phoneInput" class="field" placeholder="e.g. +91 98765 43210" aria-label="Phone Number" />
+                  <div id="phoneErr" class="field-error"></div>
+                </div>
+                <button class="btn btn-block" onclick="runPhone()">Trace Number</button>
+              </div>
+              <div id="phoneLoad" class="loader"><span class="spin"></span>Tracing telecommunications route…</div>
+              <div id="phoneRes" class="result"></div>
+            </article>
+
+            <!-- Username Search -->
+            <article class="card span-2" id="c-user">
+              <header class="card-head">
+                <div class="card-icon">
+                  <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </div>
+                <div><h2 class="card-title">Username Footprint Scan</h2><div class="card-desc">600+ sites via WhatsMyName enumeration</div></div>
+              </header>
+              <div class="form-row">
+                <div style="flex:1">
+                  <input id="userInput" class="field" placeholder="e.g. johndoe" aria-label="Username" />
+                  <div id="userErr" class="field-error"></div>
+                </div>
+                <button class="btn" onclick="runUser()">Commence Search</button>
+              </div>
+              <div id="userLoad" class="loader"><span class="spin"></span>Scanning 600+ sites (WhatsMyName) + 185+ extended platforms — may take 2–5 min…</div>
+              <div id="userRes" class="result"></div>
+            </article>
+
+          </div>
+        </section>
+
+        <!-- 2. DOMAIN SECTION -->
+        <section id="s-domain" class="section">
+          <div class="page-hero">
+            <h1>Domain Intelligence Scan</h1>
+            <p>DNS records · Security headers · Certificate transparency · Subdomain enumeration</p>
+          </div>
+          <article class="card">
+            <header class="card-head">
+              <div class="card-icon"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div>
+              <div><h2 class="card-title">Domain Intelligence Scan</h2><div class="card-desc">DNS records, security headers, threat posture</div></div>
+            </header>
+            <div class="form-row">
+              <div style="flex:1">
+                <input id="domainInput" class="field" placeholder="e.g. example.com" aria-label="Domain Name" />
+                <div id="domainErr" class="field-error"></div>
+              </div>
+              <button class="btn" onclick="runDomain()">Initiate Scan</button>
+            </div>
+            <div id="domainLoad" class="loader"><span class="spin"></span>Performing deep DNS and security analysis…</div>
+            <div id="domainRes" class="result"></div>
+          </article>
+          <article class="card">
+            <header class="card-head">
+              <div class="card-icon"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+              <div><h2 class="card-title">Domain Email Harvest</h2><div class="card-desc">Public emails via DuckDuckGo scrape + Google dork fallback</div></div>
+            </header>
+            <div class="note">Uses DuckDuckGo HTML search with random delays (4–9s) between queries. Google dork link provided when Google CAPTCHAs.</div>
+            <div class="form-row">
+              <div style="flex:1">
+                <input id="emailSiteInput" class="field" placeholder="e.g. example.com" aria-label="Domain for email harvest" />
+                <div id="emailSiteErr" class="field-error"></div>
+              </div>
+              <button class="btn" onclick="runEmailSite()">Harvest Emails</button>
+            </div>
+            <div id="emailSiteLoad" class="loader"><span class="spin"></span>Searching… random delays applied (15–30s)…</div>
+            <div id="emailSiteRes" class="result"></div>
+          </article>
+          <article class="card">
+            <header class="card-head">
+              <div class="card-icon"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+              <div><h2 class="card-title">Deep Domain Crawler</h2><div class="card-desc">Async BFS crawl — emails, phones, social links from internal pages</div></div>
+            </header>
+            <div class="note">Crawls same-domain pages (about, contact, team, etc.) with httpx async + Tor/headers. Max 30 pages, depth 2.</div>
+            <div class="form-row">
+              <div style="flex:1">
+                <input id="domainCrawlInput" class="field" placeholder="e.g. example.com" aria-label="Domain for deep crawl" />
+                <div id="domainCrawlErr" class="field-error"></div>
+              </div>
+              <button class="btn" onclick="runDomainCrawl()">Crawl Domain</button>
+            </div>
+            <div id="domainCrawlLoad" class="loader"><span class="spin"></span>Crawling… may take 30–90s…</div>
+            <div id="domainCrawlRes" class="result"></div>
+          </article>
+        </section>
+
+        <!-- 3. EMAIL SECTION -->
+        <section id="s-email" class="section">
+          <div class="page-hero">
+            <h1>Email Footprint Analysis</h1>
+            <p>Passive platform registration probe · 120+ platforms via Holehe framework · Zero target alerting</p>
+          </div>
+          <article class="card">
+            <header class="card-head">
+              <div class="card-icon"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+              <div><h2 class="card-title">Passive Email Account Audit</h2><div class="card-desc">Cross-references 120+ platform forgot-password flows</div></div>
+            </header>
+            <div class="note">⚡ Passive probe only — utilizes forgot-password endpoints. Zero credentials transmitted. Target account is neither modified nor alerted.</div>
+            <div class="form-row">
+              <div style="flex:1">
+                <input id="emailInput" type="email" class="field" placeholder="e.g. target@example.com" aria-label="Target Email" />
+                <div id="emailErr" class="field-error"></div>
+              </div>
+              <button class="btn" onclick="runEmail()">Execute Trace</button>
+            </div>
+            <div id="emailLoad" class="loader"><span class="spin"></span>Probing holehe + 100+ extended platforms (user-scanner) — may take 2–5 min…</div>
+            <div id="emailRes" class="result"></div>
+          </article>
+        </section>
+
+        <!-- 4. BREACH SECTION -->
+        <section id="s-breach" class="section">
+          <div class="page-hero">
+            <h1>Breach Database Verification</h1>
+            <p>Cross-reference identity against XposedOrNot public leak repositories</p>
+          </div>
+          <article class="card">
+            <header class="card-head">
+              <div class="card-icon"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+              <div><h2 class="card-title">Breach Database Verification</h2><div class="card-desc">Cross-check against XposedOrNot leak repositories</div></div>
+            </header>
+            <div class="note">Queries public APIs to ascertain if an identity has been compromised in known historical data breaches.</div>
+            <div class="form-row">
+              <div style="flex:1">
+                <input id="breachInput" type="email" class="field" placeholder="e.g. target@example.com" aria-label="Email for Breach Check" />
+                <div id="breachErr" class="field-error"></div>
+              </div>
+              <button class="btn" onclick="runBreach()">Verify Compromise</button>
+            </div>
+            <div id="breachLoad" class="loader"><span class="spin"></span>Querying distributed breach repositories…</div>
+            <div id="breachRes" class="result"></div>
+          </article>
+        </section>
+
+        <!-- 5. DORKING SECTION -->
+        <section id="s-dork" class="section">
+          <div class="page-hero">
+            <h1>Advanced Google Dorking</h1>
+            <p>Synthesized search operator payloads · Open directory discovery · Parameter enumeration</p>
+          </div>
+          <article class="card">
+            <header class="card-head">
+              <div class="card-icon"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div>
+              <div><h2 class="card-title">Advanced Google Dorking</h2><div class="card-desc">Open directory discovery and parameter synthesis</div></div>
+            </header>
+            <div id="queryErr" class="field-error" style="margin-bottom:8px"></div>
+            <div class="dork-row">
+              <select id="fileType" aria-label="File Type">
+                <option value="video">Video Media</option>
+                <option value="books">Document / Books</option>
+                <option value="music">Audio / Music</option>
+                <option value="software">Software / Archives</option>
+                <option value="images">Imagery</option>
+                <option value="other">Generic</option>
+              </select>
+              <select id="engine" aria-label="Search Engine">
+                <option value="google">Google</option>
+                <option value="googol">Googol</option>
+                <option value="startpage">Startpage</option>
+                <option value="searx">Searx</option>
+                <option value="filepursuit">FilePursuit</option>
+              </select>
+              <input id="query" placeholder="Target keyword or phrase…" aria-label="Dorking Query" />
+              <button class="dork-go" onclick="startSearch()" aria-label="Execute Dork Search">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              </button>
+            </div>
+            <div class="dork-preview">
+              <div class="dork-preview-l">Synthesized Payload Query</div>
+              <div id="queryPreview" class="dork-preview-v">Awaiting input syntax.</div>
+            </div>
+          </article>
+        </section>
+
+        <!-- 6. THREAT INTEL SECTION -->
+        <section id="s-threat" class="section">
+          <div class="page-hero">
+            <h1>Threat Intelligence</h1>
+            <p>AbuseIPDB · VirusTotal · Quota tracking · Direct API integration</p>
+          </div>
+
+          <div class="tally-panel">
+            <div class="tally-row">
+              <div class="tally-label"><span class="tally-dot abuse-dot"></span>AbuseIPDB · Daily</div>
+              <div class="tally-pct" id="abusePct">0%</div>
+              <div class="tally-bar">
+                <div class="tally-fill" id="abuseFill" style="width:0%"></div>
+                <div class="tally-thumb" id="abuseThumb" style="left:0%"></div>
+              </div>
+              <div class="tally-info"><span id="abuseLimitTxt">1000 / 1000</span> <span style="opacity:0.4;margin:0 6px">|</span>resets in <span class="tally-reset-time">--h --m</span></div>
+            </div>
+            <div class="tally-row">
+              <div class="tally-label"><span class="tally-dot vt-dot"></span>VirusTotal · Daily</div>
+              <div class="tally-pct" id="vtPct">0%</div>
+              <div class="tally-bar">
+                <div class="tally-fill" id="vtFill" style="width:0%"></div>
+                <div class="tally-thumb" id="vtThumb" style="left:0%"></div>
+              </div>
+              <div class="tally-info"><span id="vtLimitTxt">500 / 500</span> <span style="opacity:0.4;margin:0 6px">|</span>resets in <span class="tally-reset-time">--h --m</span></div>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <!-- AbuseIPDB -->
+            <article class="card">
+              <header class="card-head">
+                <div class="card-icon">
+                  <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                </div>
+                <div><h2 class="card-title">AbuseIPDB Scan</h2><div class="card-desc">IP reputation and abuse report analysis</div></div>
+              </header>
+              <div class="form-row">
+                <div style="flex:1">
+                  <input id="abuseTarget" class="field" placeholder="Target IP Address…" aria-label="AbuseIPDB Target" />
+                  <div id="abuseErr" class="field-error"></div>
+                </div>
+                <button class="btn" onclick="runAbuseIP()">Scan IP</button>
+              </div>
+              <div id="abuseLoad" class="loader"><span class="spin"></span>Querying AbuseIPDB network…</div>
+              <div id="abuseRes" class="result"></div>
+            </article>
+
+            <!-- VirusTotal -->
+            <article class="card">
+              <header class="card-head">
+                <div class="card-icon">
+                  <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                </div>
+                <div><h2 class="card-title">VirusTotal Scan</h2><div class="card-desc">Multi-engine malicious IP analysis</div></div>
+              </header>
+              <div class="form-row">
+                <div style="flex:1">
+                  <input id="vtTarget" class="field" placeholder="Target IP Address…" aria-label="VirusTotal Target" />
+                  <div id="vtErr" class="field-error"></div>
+                </div>
+                <button class="btn" onclick="runVirusTotal()">Analyze</button>
+              </div>
+              <div id="vtLoad" class="loader"><span class="spin"></span>Analyzing via VirusTotal engines…</div>
+              <div id="vtRes" class="result"></div>
+            </article>
+          </div>
+        </section>
+
+        <!-- 7. NETWORK TOOLS SECTION -->
+        <section id="s-network" class="section">
+          <div class="page-hero">
+            <h1>Network Infrastructure Tools</h1>
+            <p>TCP port scanning · CIDR host discovery · Subdomain CT-log enumeration</p>
+          </div>
+          <div class="grid-2">
+            <!-- Port Scanner -->
+            <article class="card">
+              <header class="card-head">
+                <div class="card-icon"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16m-7 6h7"/></svg></div>
+                <div><h2 class="card-title">TCP Port Scanner</h2><div class="card-desc">Multi-threaded TCP port enumeration</div></div>
+              </header>
+              <div class="form-row">
+                <div style="flex:1"><input id="swPortInput" class="field" placeholder="Target IP (e.g. 127.0.0.1)" /></div>
+                <button class="btn" onclick="runSpiderwebPort()">Scan Ports</button>
+              </div>
+              <div id="swPortLoad" class="loader"><span class="spin"></span>Scanning TCP ports…</div>
+              <div id="swPortRes" class="result"></div>
+            </article>
+
+            <!-- Subdomain Scanner -->
+            <article class="card">
+              <header class="card-head">
+                <div class="card-icon"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg></div>
+                <div><h2 class="card-title">Subdomain Enumerator</h2><div class="card-desc">Discover subdomains via CT logs (crt.sh)</div></div>
+              </header>
+              <div class="form-row">
+                <div style="flex:1"><input id="swSubInput" class="field" placeholder="Domain (e.g. example.com)" /></div>
+                <button class="btn" onclick="runSpiderwebSub()">Enumerate</button>
+              </div>
+              <div id="swSubLoad" class="loader"><span class="spin"></span>Querying certificate transparency logs…</div>
+              <div id="swSubRes" class="result"></div>
+            </article>
+
+            <!-- Network Discovery -->
+            <article class="card span-2">
+              <header class="card-head">
+                <div class="card-icon"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg></div>
+                <div><h2 class="card-title">CIDR Host Discovery</h2><div class="card-desc">High-speed ICMP sweep to map active infrastructure nodes</div></div>
+              </header>
+              <div class="form-row">
+                <div style="flex:1"><input id="swNetInput" class="field" placeholder="CIDR block (e.g. 192.168.1.0/24)" /></div>
+                <button class="btn" onclick="runSpiderwebNet()">Discover Hosts</button>
+              </div>
+              <div id="swNetLoad" class="loader"><span class="spin"></span>Performing ICMP network discovery…</div>
+              <div id="swNetRes" class="result"></div>
+            </article>
+          </div>
+        </section>
+
+        <!-- 8. FILE SECURITY SECTION -->
+        <section id="s-files" class="section">
+          <div class="page-hero">
+            <h1>Digital Forensics Suite</h1>
+            <p>Hash dictionary attacks · PDF encryption · PDF password recovery</p>
+          </div>
+          <div class="grid-2">
+            <!-- Hash Cracker -->
+            <article class="card">
+              <header class="card-head">
+                <div class="card-icon"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg></div>
+                <div><h2 class="card-title">Cryptographic Hash Recovery</h2><div class="card-desc">MD5 · SHA1 · SHA256 · SHA512 + salt</div></div>
+              </header>
+              <div class="form-row">
+                <div style="flex:1"><input id="swHashInput" class="field" placeholder="Target hash string…" /></div>
+              </div>
+              <div class="form-row" style="margin-top:8px;gap:8px">
+                <select id="swHashType" class="field" style="flex:0 0 120px">
+                  <option value="auto">Auto-detect</option>
+                  <option value="md5">MD5</option>
+                  <option value="sha1">SHA1</option>
+                  <option value="sha256">SHA256</option>
+                  <option value="sha512">SHA512</option>
+                </select>
+                <input id="swHashSalt" class="field" placeholder="Salt (optional)" style="flex:1" />
+                <select id="swHashSaltMode" class="field" style="flex:0 0 110px">
+                  <option value="append">append</option>
+                  <option value="prepend">prepend</option>
+                </select>
+                <button class="btn" onclick="runSpiderwebHash()">Crack Hash</button>
+              </div>
+              <div id="swHashProgress" class="crack-progress">
+                <div class="crack-progress-bar"><div id="swHashProgressFill" class="crack-progress-fill"></div></div>
+                <div id="swHashProgressLine" class="crack-progress-line">Starting…</div>
+              </div>
+              <div id="swHashLoad" class="loader"><span class="spin"></span>Running dictionary attack…</div>
+              <div id="swHashRes" class="result"></div>
+            </article>
+
+            <!-- PDF Protect -->
+            <article class="card">
+              <header class="card-head">
+                <div class="card-icon"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
+                <div><h2 class="card-title">PDF Cryptography Lock</h2><div class="card-desc">Encrypt and password-protect PDF files</div></div>
+              </header>
+              <div class="form-row" style="margin-bottom:12px">
+                <div class="upload-zone" id="pdfProtectZone" onclick="document.getElementById('pdfProtectFile').click()" role="button" tabindex="0">
+                  <div class="upload-icon">🔒</div>
+                  <div class="upload-title">Select PDF to Encrypt</div>
+                  <div class="upload-hint">Click to browse · accepts .pdf</div>
+                  <div class="upload-name" id="pdfProtectName">No file selected</div>
+                </div>
+                <input type="file" id="pdfProtectFile" accept=".pdf" style="display:none" onchange="var z=document.getElementById('pdfProtectZone'),n=document.getElementById('pdfProtectName');if(this.files.length){n.textContent=this.files[0].name;z.classList.add('has-file');}else{n.textContent='No file selected';z.classList.remove('has-file');}" />
+              </div>
+              <div class="form-row">
+                <div style="flex:1">
+                  <input id="pdfProtectPass" type="password" class="field" placeholder="Enter encryption password…" />
+                </div>
+                <button class="btn" onclick="runPdfProtect()">Encrypt PDF</button>
+              </div>
+            </article>
+
+            <!-- PDF Cracker -->
+            <article class="card span-2">
+              <header class="card-head">
+                <div class="card-icon"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg></div>
+                <div><h2 class="card-title">PDF Password Recovery</h2><div class="card-desc">Offline dictionary attack to recover locked PDF passwords</div></div>
+              </header>
+              <div class="note" id="pdfCrackWordlist" style="margin-bottom:12px;font-size:13px">Dictionary: loading…</div>
+              <div class="pdf-crack-zones">
+                <!-- PRIMARY: Password-protected PDF to crack -->
+                <div class="upload-zone upload-zone--compact" id="pdfCrackZone"
+                     onclick="document.getElementById('pdfCrackFile').click()" role="button" tabindex="0"
+                     aria-label="Choose locked PDF file">
+                  <div><span class="upload-icon">🔒</span><span class="upload-title">Choose locked PDF file</span></div>
+                  <div class="upload-hint">Select the password-protected PDF to crack</div>
+                  <div class="upload-name" id="pdfCrackName">No file chosen</div>
+                </div>
+                <input type="file" id="pdfCrackFile" accept=".pdf" style="display:none"
+                  onchange="var z=document.getElementById('pdfCrackZone'),n=document.getElementById('pdfCrackName');if(this.files.length){n.textContent=this.files[0].name;z.classList.add('has-file');}else{n.textContent='No file chosen';z.classList.remove('has-file');}">
+                <!-- SECONDARY: Optional custom wordlist -->
+                <div class="upload-zone upload-zone--compact upload-zone--optional" id="pdfCrackWordlistZone"
+                     onclick="document.getElementById('pdfCrackWordlistFile').click()" role="button" tabindex="0"
+                     aria-label="Choose custom wordlist (optional)">
+                  <div><span class="upload-icon">📖</span><span class="upload-title">Custom wordlist</span><span class="upload-optional-tag">optional</span></div>
+                  <div class="upload-hint">Defaults to rockyou.txt (14M passwords) if not selected</div>
+                  <div class="upload-name" id="pdfCrackWordlistName">No file chosen — will use rockyou.txt</div>
+                </div>
+                <input type="file" id="pdfCrackWordlistFile" accept=".txt,.lst,.dic" style="display:none"
+                  onchange="var z=document.getElementById('pdfCrackWordlistZone'),n=document.getElementById('pdfCrackWordlistName');if(this.files.length){n.textContent=this.files[0].name;z.classList.add('has-file');}else{n.textContent='No file chosen \u2014 will use rockyou.txt';z.classList.remove('has-file');}">
+              </div>
+              <div class="form-row">
+                <button class="btn btn-block" onclick="runPdfCrack()">Crack Password</button>
+              </div>
+              <div id="pdfCrackProgress" class="crack-progress">
+                <div class="crack-progress-bar"><div id="pdfCrackProgressFill" class="crack-progress-fill"></div></div>
+                <div id="pdfCrackProgressLine" class="crack-progress-line">Starting…</div>
+              </div>
+              <div id="pdfCrackLoad" class="loader"><span class="spin"></span>Attempting PDF password recovery…</div>
+              <div id="pdfCrackRes" class="result"></div>
+            </article>
+          </div>
+        </section>
+
+        <!-- RECON SECTION -->
+        <section id="s-recon" class="section">
+          <div class="page-hero">
+            <h1>Advanced OSINT Recon</h1>
+            <p>Google profile probe · SMTP validation · async port scan · MAC lookup</p>
+          </div>
+          <div class="grid-2">
+            <article class="card" id="c-emailgoogle">
+              <header class="card-head"><div class="card-icon"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M22 6l-10 7L2 6"/></svg></div>
+                <div><h2 class="card-title">Google Profile Probe</h2><div class="card-desc">Gaia ID / profile discovery</div></div></header>
+              <div class="form-row"><div style="flex:1"><input id="emailGoogleInput" class="field" placeholder="Email…" /></div><button class="btn" onclick="runEmailGoogle()">Probe</button></div>
+              <div id="emailGoogleLoad" class="loader"><span class="spin"></span>Probing…</div><div id="emailGoogleRes" class="result"></div>
+            </article>
+            <article class="card" id="c-emailsmtp">
+              <header class="card-head"><div class="card-icon"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/></svg></div>
+                <div><h2 class="card-title">SMTP Validation</h2><div class="card-desc">MX lookup + RCPT probe</div></div></header>
+              <div class="form-row"><div style="flex:1"><input id="emailSmtpInput" class="field" placeholder="Email…" /></div><button class="btn" onclick="runEmailSmtp()">Validate</button></div>
+              <div id="emailSmtpLoad" class="loader"><span class="spin"></span>Validating…</div><div id="emailSmtpRes" class="result"></div>
+            </article>
+            <article class="card" id="c-portscan-async">
+              <header class="card-head"><div class="card-icon"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16m-7 6h7"/></svg></div>
+                <div><h2 class="card-title">Async Port Scan</h2><div class="card-desc">TCP scan with banners</div></div></header>
+              <div class="form-row"><div style="flex:1"><input id="asyncPortInput" class="field" placeholder="IP or CIDR…" /></div><button class="btn" onclick="runAsyncPort()">Scan</button></div>
+              <div id="asyncPortLoad" class="loader"><span class="spin"></span>Scanning…</div><div id="asyncPortRes" class="result"></div>
+            </article>
+            <article class="card span-2" id="c-mac">
+              <header class="card-head"><div class="card-icon"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 00-8 0v2"/></svg></div>
+                <div><h2 class="card-title">MAC Vendor Lookup</h2><div class="card-desc">IEEE OUI vendor identification</div></div></header>
+              <div class="form-row"><div style="flex:1"><input id="macInput" class="field" placeholder="MAC address (e.g. AA:BB:CC:DD:EE:FF)" /></div><button class="btn" onclick="runMacLookup()">Lookup</button></div>
+              <div id="macLoad" class="loader"><span class="spin"></span>Looking up…</div><div id="macRes" class="result"></div>
+            </article>
+            <article class="card span-2" id="c-username-dork">
+              <header class="card-head">
+                <div class="card-icon"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div>
+                <div><h2 class="card-title">Username Dorking</h2><div class="card-desc">Google dork URLs + DuckDuckGo live result links</div></div>
+              </header>
+              <div class="note">Google dork links open in your browser. DuckDuckGo live scrape runs in background with 4–9s jitter between queries (~30–60s total).</div>
+              <div class="form-row">
+                <div style="flex:1">
+                  <input id="dorkUserInput" class="field" placeholder="e.g. johndoe" aria-label="Username for dorking" />
+                  <div id="dorkUserErr" class="field-error"></div>
+                </div>
+                <button class="btn" onclick="runUsernameDork()">Generate &amp; Search</button>
+              </div>
+              <div id="dorkUserLoad" class="loader"><span class="spin"></span>Searching… random delays applied (30–60s)…</div>
+              <div id="dorkUserRes" class="result"></div>
+            </article>
+            <article class="card span-2" id="c-github-intel">
+              <header class="card-head">
+                <div class="card-icon"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22"/></svg></div>
+                <div><h2 class="card-title">GitHub Intel</h2><div class="card-desc">Commit emails &amp; repos from GitHub public API (username or domain)</div></div>
+              </header>
+              <div class="note">Unauthenticated GitHub API (60 req/hr). Filters noreply/github addresses. Domain mode searches users with matching emails.</div>
+              <div class="form-row">
+                <div style="flex:1">
+                  <input id="githubIntelInput" class="field" placeholder="username or company.com" aria-label="GitHub username or domain" />
+                  <div id="githubIntelErr" class="field-error"></div>
+                </div>
+                <button class="btn" onclick="runGithubIntel()">Extract Intel</button>
+              </div>
+              <div id="githubIntelLoad" class="loader"><span class="spin"></span>Querying GitHub public API…</div>
+              <div id="githubIntelRes" class="result"></div>
+            </article>
+          </div>
+        </section>
+
+        <!-- SUPERVISOR SECTION -->
+        <section id="s-supervisor" class="section">
+          <div class="page-hero"><h1>Supervisor Dashboard</h1><p>Active cases · recent audit · online sessions</p></div>
+          <article class="card">
+            <div id="supervisorLoad" class="loader"><span class="spin"></span>Loading overview…</div>
+            <div id="supervisorRes" class="result"></div>
+          </article>
+        </section>
+
+      </main>
+
+      <footer class="footer" role="contentinfo">
+        <div>ARGUS Intelligence Platform · All operations are chain-of-custody logged · LEA Edition</div>
+        <div>Designed by <a href="#" style="color:var(--accent);">Rajarshi Chakraborty</a></div>
+      </footer>
+    </div><!-- .content-wrap -->
+  </div><!-- .workspace -->
+
+<!-- Tour elements (dynamically created) -->
+
+<script>
+// ── Session state ──
+let _sessionUser = null;
+let _activeCaseId = null;
+let _activeCase = null;
+let _caseModeEnabled = false;
+const CASE_MODE_KEY = 'argus_case_mode';
+const ACTIVE_CASE_KEY = 'argus_active_case_id';
+
+function _apiBaseHeaders() {
+  const h = {'X-Interface': 'GUI'};
+  if (_caseModeEnabled && _activeCaseId) {
+    h['X-Case-Mode'] = 'on';
+    h['X-Case-Id'] = _activeCaseId;
+  } else {
+    h['X-Case-Mode'] = 'off';
+  }
+  return h;
+}
+
+function requireCase() {
+  if (!_caseModeEnabled) return true;
+  if (!_activeCaseId) {
+    toast('Active investigation case required. Create or select a case with authorization reference.', 'err', 6000);
+    return false;
+  }
+  if (!_activeCase?.authorization_ref) {
+    toast('Case must have authorization_ref (warrant/court order) before running tools.', 'err', 6000);
+    return false;
+  }
+  return true;
+}
+
+async function api(u, opts={}) {
+  opts.credentials = 'include';
+  opts.headers = {..._apiBaseHeaders(), ...(opts.headers||{})};
+  const r = await fetch(u, opts);
+  if (r.status === 401) {
+    const b = await r.json().catch(()=>null);
+    if (b?.requires_profile) { showProfileModal(); throw new Error(b.error || 'Select an investigator profile first.'); }
+    showProfileModal();
+    throw new Error(b?.error || 'Profile required.');
+  }
+  if (!r.ok) {
+    const b = await r.json().catch(()=>null);
+    if (b?.requires_ack) { document.getElementById('ackBlock').style.display='block'; }
+    throw new Error(b?.error || r.status+' '+r.statusText);
+  }
+  const ct = r.headers.get('content-type')||'';
+  if (ct.includes('application/json')) return r.json();
+  return r.text();
+}
+
+function showProfileModal() {
+  document.getElementById('profileOverlay').classList.remove('hidden');
+  document.getElementById('logoutBtn').style.display = 'none';
+  loadProfilePicker();
+}
+function hideProfileModal() {
+  document.getElementById('profileOverlay').classList.add('hidden');
+  document.getElementById('logoutBtn').style.display = '';
+}
+
+async function loadProfilePicker() {
+  const list = document.getElementById('profileList');
+  if (!list) return;
+  list.innerHTML = '<div class="note">Loading profiles…</div>';
+  try {
+    const d = await fetch('/api/auth/profiles', {credentials:'include'}).then(r=>r.json());
+    const profiles = d.profiles || [];
+    if (!profiles.length) {
+      list.innerHTML = '<div class="note">No profiles yet — add one below.</div>';
+      return;
+    }
+    list.innerHTML = profiles.map(p => `
+      <button type="button" class="profile-btn" onclick="selectProfile('${esc(p.id)}')">
+        ${esc(p.display_name)}<span class="profile-btn-role">${esc(p.role)}</span>
+      </button>
+    `).join('');
+  } catch(e) {
+    list.innerHTML = `<div class="note">${esc(e.message)}</div>`;
+  }
+}
+
+async function selectProfile(profileId) {
+  try {
+    const d = await fetch('/api/auth/profile/select', {
+      method:'POST', credentials:'include',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({profile_id: profileId})
+    }).then(async r => {
+      const body = await r.json();
+      if (!r.ok) throw new Error(body.error || 'Profile selection failed');
+      return body;
+    });
+    _sessionUser = {
+      username: d.profile?.display_name,
+      display_name: d.profile?.display_name,
+      role: d.profile?.role,
+    };
+    hideProfileModal();
+    await bootstrapSession();
+    toast('Profile: '+d.profile.display_name,'ok');
+  } catch(e) { toast(e.message); }
+}
+
+async function createAndSelectProfile() {
+  const display_name = document.getElementById('newProfileName').value.trim();
+  const role = document.getElementById('newProfileRole').value;
+  if (!display_name) return toast('Display name required.', 'err');
+  try {
+    const created = await fetch('/api/auth/profiles', {
+      method:'POST', credentials:'include',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({display_name, role})
+    }).then(async r => {
+      const body = await r.json();
+      if (!r.ok) throw new Error(body.error || 'Create failed');
+      return body;
+    });
+    document.getElementById('newProfileName').value = '';
+    await selectProfile(created.profile.id);
+  } catch(e) { toast(e.message); }
+}
+
+function switchProfile() {
+  closeVault();
+  doLogout();
+}
+
+async function doAcknowledge() {
+  if (!document.getElementById('leaAckCheck').checked) return toast('Acknowledgment required.','err');
+  try {
+    await api('/api/auth/acknowledge', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({interface:'GUI'})});
+    document.getElementById('ackBlock').style.display='none';
+    toast('Authorization acknowledged.','ok');
+  } catch(e) { toast(e.message); }
+}
+
+async function doLogout() {
+  try { await fetch('/api/auth/logout', {method:'POST', credentials:'include'}); } catch(_){}
+  _sessionUser = null; _activeCaseId = null; _activeCase = null; _caseModeEnabled = false;
+  sessionStorage.removeItem(CASE_MODE_KEY);
+  sessionStorage.removeItem(ACTIVE_CASE_KEY);
+  showProfileModal();
+}
+
+function updateCasePanelUI() {
+  const panel = document.getElementById('casePanel');
+  if (!_caseModeEnabled) {
+    panel?.classList.add('dimmed');
+    document.getElementById('caseActiveLabel').textContent = 'Case: disabled (ad-hoc mode)';
+    document.getElementById('caseAuthRef').textContent = 'Case mode disabled this session';
+    return;
+  }
+  panel?.classList.remove('dimmed');
+  document.getElementById('caseActiveLabel').textContent = _activeCaseId || 'No active case';
+  document.getElementById('caseAuthRef').textContent = _activeCase?.authorization_ref
+    ? 'Auth: '+_activeCase.authorization_ref : '';
+}
+
+function showCaseModeModal() {
+  const modal = document.getElementById('caseModeModal');
+  document.getElementById('caseModeChoice').style.display = '';
+  document.getElementById('caseModeForm').classList.remove('visible');
+  if (_sessionUser?.display_name || _sessionUser?.username) {
+    document.getElementById('cmLead').placeholder = _sessionUser.display_name || _sessionUser.username;
+  }
+  modal.classList.add('visible');
+  document.getElementById('caseModeEnableBtn').focus();
+}
+
+function hideCaseModeModal() {
+  const modal = document.getElementById('caseModeModal');
+  modal.classList.remove('visible');
+}
+
+function showCaseModeForm() {
+  document.getElementById('caseModeChoice').style.display = 'none';
+  document.getElementById('caseModeForm').classList.add('visible');
+  switchCaseTab('new');
+  loadExistingCasesForModal();
+  document.getElementById('cmTitle').focus();
+}
+
+function switchCaseTab(tab) {
+  const isNew = tab === 'new';
+  document.getElementById('caseTabNew').classList.toggle('on', isNew);
+  document.getElementById('caseTabExisting').classList.toggle('on', !isNew);
+  document.getElementById('caseFormNew').style.display = isNew ? '' : 'none';
+  document.getElementById('caseFormExisting').style.display = isNew ? 'none' : '';
+}
+
+async function loadExistingCasesForModal() {
+  const sel = document.getElementById('cmExistingSelect');
+  try {
+    const d = await api('/api/cases');
+    const open = (d.cases||[]).filter(c => c.status === 'open');
+    if (!open.length) {
+      sel.innerHTML = '<option value="">No open cases — create a new one</option>';
+      switchCaseTab('new');
+      return;
+    }
+    sel.innerHTML = open.map(c =>
+      `<option value="${esc(c.case_id)}">${esc(c.case_id)} — ${esc(c.title||'')}</option>`
+    ).join('');
+  } catch(e) {
+    sel.innerHTML = '<option value="">Failed to load cases</option>';
+  }
+}
+
+async function submitCaseModeForm() {
+  const isNew = document.getElementById('caseFormNew').style.display !== 'none';
+  try {
+    if (isNew) {
+      const title = document.getElementById('cmTitle').value.trim();
+      const auth = document.getElementById('cmAuthRef').value.trim();
+      const lead = document.getElementById('cmLead').value.trim();
+      const legal = document.getElementById('cmLegal').value.trim();
+      if (!title) return toast('Case title is required.', 'err');
+      if (!auth) return toast('Authorization reference is required.', 'err');
+      const created = await api('/api/cases', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          title,
+          authorization_ref: auth,
+          lead_investigator: lead || _sessionUser?.display_name || _sessionUser?.username || '',
+          legal_basis: legal,
+        }),
+      });
+      await api(`/api/cases/${created.case.case_id}/activate`, {method:'POST'});
+      _caseModeEnabled = true;
+      _activeCaseId = created.case.case_id;
+      _activeCase = created.case;
+    } else {
+      const pick = document.getElementById('cmExistingSelect').value;
+      if (!pick) return toast('Select a case to open.', 'err');
+      await api(`/api/cases/${pick}/activate`, {method:'POST'});
+      _caseModeEnabled = true;
+      _activeCaseId = pick;
+      const detail = await api(`/api/cases/${pick}`);
+      _activeCase = detail.case;
+    }
+    sessionStorage.setItem(CASE_MODE_KEY, 'on');
+    sessionStorage.setItem(ACTIVE_CASE_KEY, _activeCaseId);
+    hideCaseModeModal();
+    updateCasePanelUI();
+    await refreshVaultStatus();
+    maybeShowWelcome();
+    toast('Case mode enabled: '+_activeCaseId, 'ok');
+  } catch(e) { toast(e.message); }
+}
+
+function continueWithoutCase() {
+  if (document.getElementById('caseModeForm').classList.contains('visible')) {
+    document.getElementById('caseModeForm').classList.remove('visible');
+    document.getElementById('caseModeChoice').style.display = '';
+    return;
+  }
+  sessionStorage.setItem(CASE_MODE_KEY, 'off');
+  sessionStorage.removeItem(ACTIVE_CASE_KEY);
+  _caseModeEnabled = false;
+  _activeCaseId = null;
+  _activeCase = null;
+  hideCaseModeModal();
+  updateCasePanelUI();
+  refreshVaultStatus();
+  maybeShowWelcome();
+  toast('Ad-hoc mode — all tools available without a case.', 'ok');
+}
+
+async function bootstrapSession() {
+  try {
+    const st = await fetch('/api/auth/status', {credentials:'include'}).then(r=>r.json());
+    if (st.auth_enabled && !st.authenticated) { showProfileModal(); return; }
+    if (!st.lea_acknowledged) document.getElementById('ackBlock').style.display='block';
+    else document.getElementById('ackBlock').style.display='none';
+    _sessionUser = st.user || (st.profile ? {
+      username: st.profile.display_name,
+      display_name: st.profile.display_name,
+      role: st.profile.role,
+    } : null);
+    updateAdminSettingsUI();
+    updateCurrentProfilePanel();
+
+    const modeChoice = sessionStorage.getItem(CASE_MODE_KEY);
+    if (modeChoice === 'off') {
+      _caseModeEnabled = false;
+      _activeCaseId = null;
+      _activeCase = null;
+      updateCasePanelUI();
+      await refreshVaultStatus();
+      maybeShowWelcome();
+      return;
+    }
+    if (modeChoice === 'on') {
+      _activeCaseId = sessionStorage.getItem(ACTIVE_CASE_KEY);
+      if (!_activeCaseId) {
+        _caseModeEnabled = false;
+        showCaseModeModal();
+        return;
+      }
+      _caseModeEnabled = true;
+      await refreshCasePanel();
+      if (!_activeCaseId) {
+        sessionStorage.removeItem(CASE_MODE_KEY);
+        sessionStorage.removeItem(ACTIVE_CASE_KEY);
+        _caseModeEnabled = false;
+        showCaseModeModal();
+        return;
+      }
+      await refreshVaultStatus();
+      maybeShowWelcome();
+      return;
+    }
+
+    showCaseModeModal();
+  } catch(_) {}
+}
+
+function updateAdminSettingsUI() {
+  const isAdmin = _sessionUser?.role === 'admin';
+  const usersTab = document.getElementById('usersTabBtn');
+  if (usersTab) usersTab.style.display = isAdmin ? '' : 'none';
+  const roleSelect = document.getElementById('newProfileRole');
+  if (roleSelect && !isAdmin) {
+    roleSelect.value = 'investigator';
+    Array.from(roleSelect.options).forEach(opt => {
+      if (opt.value !== 'investigator') opt.disabled = true;
+    });
+  }
+}
+
+function updateCurrentProfilePanel() {
+  const nameEl = document.getElementById('currentProfileName');
+  const roleEl = document.getElementById('currentProfileRole');
+  if (!nameEl || !roleEl) return;
+  const name = _sessionUser?.display_name || _sessionUser?.username || '—';
+  nameEl.textContent = name;
+  roleEl.textContent = _sessionUser?.role || '—';
+}
+
+const WELCOME_KEY = 'argus_welcome_v1';
+let _welcomeFocusTrap = null;
+
+function dismissWelcome(startTourAfter) {
+  localStorage.setItem(WELCOME_KEY, '1');
+  const modal = document.getElementById('welcomeModal');
+  modal.classList.remove('visible');
+  modal.setAttribute('aria-hidden', 'true');
+  if (_welcomeFocusTrap) {
+    document.removeEventListener('keydown', _welcomeFocusTrap, true);
+    _welcomeFocusTrap = null;
+  }
+  if (startTourAfter) setTimeout(() => startWebTour(), 200);
+}
+
+function maybeShowWelcome() {
+  if (localStorage.getItem(WELCOME_KEY)) return;
+  if (!_sessionUser) return;
+  const modal = document.getElementById('welcomeModal');
+  modal.classList.add('visible');
+  modal.setAttribute('aria-hidden', 'false');
+  const startBtn = document.getElementById('welcomeStartTour');
+  const skipBtn = document.getElementById('welcomeSkip');
+  startBtn.focus();
+  _welcomeFocusTrap = (e) => {
+    if (e.key === 'Escape') { e.preventDefault(); dismissWelcome(false); return; }
+    if (e.key !== 'Tab' || !modal.classList.contains('visible')) return;
+    const focusable = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+    const nodes = Array.from(focusable).filter(el => !el.disabled && el.offsetParent !== null);
+    if (!nodes.length) return;
+    const first = nodes[0], last = nodes[nodes.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  };
+  document.addEventListener('keydown', _welcomeFocusTrap, true);
+  startBtn.onclick = () => dismissWelcome(true);
+  skipBtn.onclick = () => dismissWelcome(false);
+}
+
+async function refreshCasePanel() {
+  if (!_caseModeEnabled) {
+    updateCasePanelUI();
+    return;
+  }
+  try {
+    const d = await api('/api/cases/active');
+    _activeCaseId = d.active_case_id || sessionStorage.getItem(ACTIVE_CASE_KEY);
+    _activeCase = d.case;
+    if (_activeCaseId) sessionStorage.setItem(ACTIVE_CASE_KEY, _activeCaseId);
+    updateCasePanelUI();
+  } catch(_) {
+    updateCasePanelUI();
+  }
+}
+
+async function showCaseModal() {
+  if (!_caseModeEnabled) {
+    if (!confirm('Enable case mode and select a case?')) return;
+    _caseModeEnabled = true;
+    sessionStorage.setItem(CASE_MODE_KEY, 'on');
+    updateCasePanelUI();
+  }
+  showCaseModeForm();
+  document.getElementById('caseModeModal').classList.add('visible');
+}
+
+async function exportCaseReport() {
+  if (!_caseModeEnabled) {
+    toast('Case mode was disabled this session. Re-start and choose yes to enable exports.', 'err', 6000);
+    return;
+  }
+  if (!requireCase()) return;
+  try {
+    const html = await api('/api/evidence/export', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({scope:'case', format:'html', case_id:_activeCaseId})});
+    const w = window.open('','_blank');
+    w.document.write(html); w.document.close();
+  } catch(e) { toast(e.message); }
+}
+
+async function exportLastResult() {
+  try {
+    const bundle = await api('/api/evidence/export', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({scope:'last', format:'json'})});
+    const blob = new Blob([JSON.stringify(bundle,null,2)], {type:'application/json'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'argus_evidence_last.json'; a.click();
+    toast('Evidence exported.','ok');
+  } catch(e) { toast(e.message); }
+}
+
+async function refreshVaultStatus() {
+  try {
+    const d = await api('/api/vault/keys');
+    const keys = d.keys||{};
+    document.getElementById('badge-vt').className = keys.VT_API_KEY==='CONFIGURED' ? 'api-badge ok' : 'api-badge dim';
+    document.getElementById('badge-abuse').className = keys.ABUSE_IPDB_KEY==='CONFIGURED' ? 'api-badge ok' : 'api-badge dim';
+  } catch(_) {}
+}
+
+// ── Navigation ──
+function go(name, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('on'));
+
+  const targetSec = document.getElementById('s-' + name);
+  if (targetSec) {
+    targetSec.style.animation = 'none';
+    targetSec.offsetHeight;
+    targetSec.style.animation = null;
+    targetSec.classList.add('active');
+  }
+
+  if (btn) {
+    btn.classList.add('on');
+  } else {
+    const found = document.querySelector(`.nav-btn[data-section="${name}"]`);
+    if (found) found.classList.add('on');
+  }
+  // Ensure the right sidebar button is on if clicked from tour
+  document.querySelectorAll(`.nav-btn[data-section="${name}"]`).forEach(b => b.classList.add('on'));
+}
+
+// ── Toast ──
+const _recentToasts = new Map();
+function toast(msg, type='err', ms=4000) {
+  const key = type + '|' + msg;
+  const now = Date.now();
+  const last = _recentToasts.get(key);
+  if (last && now - last < 3000) return;
+  _recentToasts.set(key, now);
+  const c = document.getElementById('toasts'), t = document.createElement('div');
+  t.className = 'toast-item ' + type; t.textContent = msg; c.appendChild(t);
+  setTimeout(() => { t.style.animation='toast-out 0.3s cubic-bezier(0.16,1,0.3,1) forwards'; setTimeout(()=>t.remove(),300); }, ms);
+}
+
+// ── Form error ──
+function setErr(iid, eid, msg) {
+  const i=document.getElementById(iid), e=document.getElementById(eid);
+  if (msg) { i.style.borderColor='rgba(196,92,92,0.5)'; e.textContent=msg; e.classList.add('visible'); }
+  else { i.style.borderColor=''; e.classList.remove('visible'); e.textContent=''; }
+}
+
+// ── DOM helpers ──
+function showL(id) { document.getElementById(id).classList.add('visible'); }
+function hideL(id) { document.getElementById(id).classList.remove('visible'); }
+function showR(id) {
+  const e=document.getElementById(id);
+  e.classList.add('visible');
+  requestAnimationFrame(()=>setTimeout(()=>e.scrollIntoView({behavior:'smooth',block:'nearest'}),100));
+}
+function hideR(id) { const e=document.getElementById(id); e.classList.remove('visible'); e.innerHTML=''; }
+function esc(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+// ── JSON dev view ──
+function jsonUI(data) {
+  const id='j'+Math.random().toString(36).slice(2,8), cid='c'+id;
+  return `<div style="margin-top:18px;display:flex;gap:10px;align-items:center;border-top:1px solid var(--border);padding-top:14px;">
+    <button class="export-btn" type="button" onclick="exportLastResult()">Export Evidence</button>
+    <button class="json-toggle" onclick="var e=document.getElementById('${id}'),c=document.getElementById('${cid}');e.style.display=e.style.display==='none'?'block':'none';c.style.display=e.style.display;this.textContent=e.style.display==='none'?'View Raw JSON ▸':'Hide JSON ▾'">View Raw JSON ▸</button>
+    <button id="${cid}" class="copy-small" onclick="navigator.clipboard.writeText(document.getElementById('${id}').textContent).then(()=>{this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy Raw',1500)})">Copy Raw</button>
+  </div><div id="${id}" class="json-box">${esc(JSON.stringify(data,null,2))}</div>`;
+}
+
+// ── System health ──
+(async()=>{
+  try{
+    await fetch('/api/health');
+    const dot=document.getElementById('hDot');
+    dot.classList.add('on');
+    document.getElementById('healthLabel').textContent='System Online';
+    document.getElementById('healthLabel').style.color='var(--green)';
+  }catch{
+    const dot=document.getElementById('hDot');
+    dot.classList.add('off');
+    document.getElementById('healthLabel').textContent='Offline';
+    document.getElementById('healthLabel').style.color='var(--red)';
+  }
+  await bootstrapSession();
+})();
+
+// ── 1. IP Module ──
+async function runIP(){
+  if(!requireCase()) return;
+  const v=document.getElementById('ipInput').value.trim();
+  if(!v) return setErr('ipInput','ipErr','An IP address is required.');
+  setErr('ipInput','ipErr','');
+  showL('ipLoad'); hideR('ipRes');
+  try{ renderIP(await api(`/api/ip?ip=${encodeURIComponent(v)}`)); }
+  catch(e){ toast(e.message); }
+  finally{ hideL('ipLoad'); }
+}
+function renderIP(d){
+  const el=document.getElementById('ipRes');
+  if(d.error||d.success===false){
+    el.innerHTML=`<div class="note">${esc(d.message||d.error||'Failed.')}</div>`;
+    showR('ipRes'); return;
+  }
+  const f=d.flag?.emoji||'🌐', loc=[d.city,d.region,d.country].filter(Boolean).join(', ');
+  let vt='', ab='';
+  if(d.virustotal){
+    vt=`<div class="panel"><div class="panel-label">VirusTotal Analysis</div>${d.virustotal.error?`<div style="font-size:12px;color:var(--red)">${esc(d.virustotal.error)}</div>`:`<div class="kv"><span class="kv-k">Reputation Score</span><span class="kv-v">${d.virustotal.reputation}</span></div><div class="kv"><span class="kv-k">Malicious</span><span class="kv-v"${d.virustotal.malicious>0?' style="color:var(--red)"':''}>${d.virustotal.malicious}</span></div><div class="kv"><span class="kv-k">Suspicious</span><span class="kv-v"${d.virustotal.suspicious>0?' style="color:var(--orange)"':''}>${d.virustotal.suspicious}</span></div><div class="kv"><span class="kv-k">Harmless</span><span class="kv-v" style="color:var(--green)">${d.virustotal.harmless}</span></div>`}</div>`;
+  }
+  if(d.abuseipdb){
+    ab=`<div class="panel"><div class="panel-label">AbuseIPDB Posture</div>${d.abuseipdb.error?`<div style="font-size:12px;color:var(--red)">${esc(d.abuseipdb.error)}</div>`:`<div class="kv"><span class="kv-k">Confidence Score</span><span class="kv-v"${d.abuseipdb.abuseConfidenceScore>0?' style="color:var(--red)"':''}>${d.abuseipdb.abuseConfidenceScore}%</span></div><div class="kv"><span class="kv-k">Total Reports</span><span class="kv-v">${d.abuseipdb.totalReports}</span></div><div class="kv"><span class="kv-k">Domain</span><span class="kv-v mono">${esc(d.abuseipdb.domain||'—')}</span></div>`}</div>`;
+  }
+  // Shodan InternetDB exposure (open ports, CVEs, CPEs, tags)
+  let shodan='';
+  const sh=d.shodan||d.internetdb||d.shodan_internetdb;
+  if(sh && typeof sh==='object'){
+    const arrify=v=>Array.isArray(v)?v:(v==null?[]:[v]);
+    const ports=arrify(sh.ports||sh.open_ports), cves=arrify(sh.vulns||sh.cves||sh.cve),
+          cpes=arrify(sh.cpes||sh.cpe), tags=arrify(sh.tags), hosts=arrify(sh.hostnames||sh.hostname);
+    const chips=(arr)=>arr.length?arr.map(x=>`<span class="pill pill-dim" style="font-family:var(--mono);font-size:10.5px;text-transform:none;margin:2px 4px 2px 0">${esc(String(x))}</span>`).join(''):'<span style="color:var(--text-quaternary);font-size:12px">None</span>';
+    if(sh.error){
+      shodan=`<div class="panel span-2"><div class="panel-label">Shodan InternetDB</div><div style="font-size:12px;color:var(--text-tertiary)">${esc(sh.error)}</div></div>`;
+    } else if(ports.length||cves.length||cpes.length||tags.length||hosts.length){
+      const cveChips=cves.length?cves.map(x=>`<a href="https://nvd.nist.gov/vuln/detail/${encodeURIComponent(x)}" target="_blank" rel="noopener" class="pill pill-red" style="font-family:var(--mono);font-size:10.5px;text-transform:none;margin:2px 4px 2px 0;text-decoration:none">${esc(String(x))}</a>`).join(''):'<span style="color:var(--text-quaternary);font-size:12px">None detected</span>';
+      shodan=`<div class="panel span-2"><div class="panel-label">Shodan InternetDB · Exposure Surface</div>
+        <div class="sub-label" style="margin-top:4px">Open Ports <span class="pill pill-dim" style="margin-left:4px">${ports.length}</span></div><div class="chips">${chips(ports)}</div>
+        <div class="sub-label" style="margin-top:12px">CVEs / Vulnerabilities <span class="pill ${cves.length?'pill-red':'pill-dim'}" style="margin-left:4px">${cves.length}</span></div><div class="chips">${cveChips}</div>
+        <div class="sub-label" style="margin-top:12px">CPEs</div><div class="chips">${chips(cpes)}</div>
+        <div class="sub-label" style="margin-top:12px">Tags</div><div class="chips">${chips(tags)}</div>
+        ${hosts.length?`<div class="sub-label" style="margin-top:12px">Hostnames</div><div class="chips">${chips(hosts)}</div>`:''}
+      </div>`;
+    }
+  }
+  el.innerHTML=`
+    <header class="res-header">
+      <div><div class="res-title">${f} ${esc(d.ip||'')}</div><div class="res-sub">${esc(loc||'Origin Unknown')}</div></div>
+      <span class="pill pill-accent">${esc(d.type||'IPv4')}</span>
+    </header>
+    <div class="data-grid">
+      <div class="panel"><div class="panel-label">Network Infrastructure</div>
+        <div class="kv"><span class="kv-k">ISP</span><span class="kv-v">${esc(d.connection?.isp||'—')}</span></div>
+        <div class="kv"><span class="kv-k">Organization</span><span class="kv-v">${esc(d.connection?.org||'—')}</span></div>
+        <div class="kv"><span class="kv-k">ASN</span><span class="kv-v mono">${esc(String(d.connection?.asn||'—'))}</span></div>
+        <div class="kv"><span class="kv-k">Domain</span><span class="kv-v mono">${esc(d.connection?.domain||'—')}</span></div>
+      </div>
+      <div class="panel"><div class="panel-label">Geographic Data</div>
+        <div class="kv"><span class="kv-k">Country</span><span class="kv-v">${esc(d.country||'—')}</span></div>
+        <div class="kv"><span class="kv-k">Region</span><span class="kv-v">${esc(d.region||'—')}</span></div>
+        <div class="kv"><span class="kv-k">City</span><span class="kv-v">${esc(d.city||'—')}</span></div>
+        <div class="kv"><span class="kv-k">Postal</span><span class="kv-v">${esc(d.postal||'—')}</span></div>
+        <div class="kv"><span class="kv-k">Coordinates</span><span class="kv-v mono">${d.latitude??'—'}, ${d.longitude??'—'}</span></div>
+        <div class="kv"><span class="kv-k">Timezone</span><span class="kv-v">${esc(d.timezone?.id||'—')}</span></div>
+      </div>
+      ${vt}${ab}${shodan}
+    </div>
+    ${jsonUI(d)}`;
+  showR('ipRes');
+}
+
+// ── 2. Phone Module ──
+const TC_PHONE_KEY = 'argus_truecaller_phone';
+let _pendingPhone = '';
+
+function showTcPhoneModal() {
+  const modal = document.getElementById('tcPhoneModal');
+  document.getElementById('tcPhoneChoice').style.display = '';
+  document.getElementById('tcPhoneSetup').classList.remove('visible');
+  document.getElementById('tcPhoneSetupInput').value = '';
+  modal.classList.add('visible');
+}
+
+function hideTcPhoneModal() {
+  document.getElementById('tcPhoneModal').classList.remove('visible');
+}
+
+async function tcVaultConfigured() {
+  try {
+    const d = await api('/api/vault/keys');
+    return (d.keys || {}).TRUECALLER_ID === 'CONFIGURED';
+  } catch (_) {
+    return false;
+  }
+}
+
+async function chooseTcPhone(enable) {
+  sessionStorage.setItem(TC_PHONE_KEY, enable ? 'true' : 'false');
+  if (!enable) {
+    hideTcPhoneModal();
+    await executePhoneScan(_pendingPhone, false);
+    _pendingPhone = '';
+    return;
+  }
+  if (await tcVaultConfigured()) {
+    hideTcPhoneModal();
+    await executePhoneScan(_pendingPhone, true);
+    _pendingPhone = '';
+    return;
+  }
+  document.getElementById('tcPhoneChoice').style.display = 'none';
+  document.getElementById('tcPhoneSetup').classList.add('visible');
+}
+
+async function submitTcPhoneSetup() {
+  const token = document.getElementById('tcPhoneSetupInput').value.trim();
+  if (token) {
+    try {
+      await api('/api/vault/keys', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ service: 'truecaller', value: token }),
+      });
+      toast('Truecaller ID saved to vault.', 'ok');
+    } catch (e) {
+      toast(e.message);
+      return;
+    }
+  }
+  hideTcPhoneModal();
+  await executePhoneScan(_pendingPhone, true, token);
+  _pendingPhone = '';
+}
+
+async function executePhoneScan(phone, useTruecaller, installationId) {
+  const body = { phone, truecaller: useTruecaller };
+  if (installationId) body.installation_id = installationId;
+  showL('phoneLoad'); hideR('phoneRes');
+  try { renderPhone(await api('/api/phone', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })); }
+  catch (e) { toast(e.message); }
+  finally { hideL('phoneLoad'); }
+}
+
+async function runPhone(){
+  const v=document.getElementById('phoneInput').value.trim();
+  if(!v) return setErr('phoneInput','phoneErr','A phone number is required.');
+  setErr('phoneInput','phoneErr','');
+  const choice = sessionStorage.getItem(TC_PHONE_KEY);
+  if (choice === null) {
+    _pendingPhone = v;
+    showTcPhoneModal();
+    return;
+  }
+  await executePhoneScan(v, choice === 'true');
+}
+function renderPhone(d){
+  const el=document.getElementById('phoneRes');
+  const vb=d.is_valid?'<span class="pill pill-green">Verified Active</span>':d.is_valid===false?'<span class="pill pill-red">Invalid Number</span>':'<span class="pill pill-dim">Status Unknown</span>';
+  let tc='';
+  const tcd=d.truecaller;
+  if(tcd && typeof tcd==='object' && !tcd.skipped){
+    if(tcd.configured===false){
+      tc=`<div class="note" style="margin-top:14px;border-left:3px solid var(--yellow)">Truecaller not configured — <a href="#" onclick="openVault();return false;" style="color:var(--accent)">Settings → API Keys</a> or <span class="mono">keys set truecaller &lt;id&gt;</span></div>`;
+    } else if(tcd.available===false){
+      tc=`<div class="note" style="margin-top:14px;border-left:3px solid var(--red)">Truecaller: ${esc(tcd.error||'lookup failed')}</div>`;
+    } else {
+      const spam=tcd.spam_score;
+      const spamPct=spam!=null?Math.min(100,Math.max(0,Number(spam))):0;
+      const spamColor=spam>25?'var(--red)':spam>0?'var(--yellow)':'var(--green)';
+      const alertBanner=tcd.alert?`<div class="note" style="margin-bottom:12px;border-left:3px solid var(--red);background:rgba(255,60,60,.08)">⚠ ${esc(tcd.alert)}</div>`:'';
+      const alts=(tcd.alternate_names||[]).length?`<div class="kv"><span class="kv-k">Alt Names</span><span class="kv-v">${(tcd.alternate_names||[]).map(n=>esc(n)).join(', ')}</span></div>`:'';
+      tc=`<div class="panel" style="grid-column:1/-1">
+        <div class="panel-label">Truecaller Intelligence Dossier</div>
+        ${alertBanner}
+        <div class="kv"><span class="kv-k">Primary Name</span><span class="kv-v">${esc(tcd.primary_name||'—')}</span></div>
+        ${alts}
+        <div class="kv"><span class="kv-k">Carrier</span><span class="kv-v">${esc(tcd.carrier||'—')}</span></div>
+        <div class="kv"><span class="kv-k">Email</span><span class="kv-v mono">${esc(tcd.email||'—')}</span></div>
+        <div class="kv"><span class="kv-k">Verified</span><span class="kv-v">${tcd.verified?'<span class="pill pill-green">Verified</span>':'—'}</span></div>
+        <div class="kv"><span class="kv-k">Location</span><span class="kv-v">${esc([tcd.city,tcd.country].filter(Boolean).join(', ')||'—')}</span></div>
+        <div class="kv"><span class="kv-k">Timezone</span><span class="kv-v">${esc(tcd.timezone||'—')}</span></div>
+        ${spam!=null?`<div class="kv"><span class="kv-k">Spam Score</span><span class="kv-v">${esc(String(spam))}${tcd.spam_type?' · '+esc(tcd.spam_type):''}</span></div>
+        <div style="margin-top:8px;height:6px;background:var(--surface-2);border-radius:3px;overflow:hidden"><div style="width:${spamPct}%;height:100%;background:${spamColor}"></div></div>`:''}
+        ${(tcd.tags||[]).length?`<div class="kv" style="margin-top:8px"><span class="kv-k">Tags</span><span class="kv-v">${(tcd.tags||[]).map(t=>'<span class="pill pill-dim">'+esc(t)+'</span>').join(' ')}</span></div>`:''}
+      </div>`;
+    }
+  }
+  el.innerHTML=`
+    <header class="res-header">
+      <div><div class="res-title">${esc(d.international_format||d.e164_format||'')}</div><div class="res-sub">${esc(d.location||'—')} · ${esc(d.carrier||'—')}</div></div>
+      ${vb}
+    </header>
+    <div class="data-grid">
+      <div class="panel"><div class="panel-label">Telecommunications Profile</div>
+        <div class="kv"><span class="kv-k">Region</span><span class="kv-v">${esc(d.region||'—')}</span></div>
+        <div class="kv"><span class="kv-k">Carrier</span><span class="kv-v">${esc(d.carrier||'—')}</span></div>
+        <div class="kv"><span class="kv-k">Location</span><span class="kv-v">${esc(d.location||'—')}</span></div>
+        <div class="kv"><span class="kv-k">Line Type</span><span class="kv-v">${esc(d.number_type||'—')}</span></div>
+      </div>
+      <div class="panel"><div class="panel-label">Routing Formats</div>
+        <div class="kv"><span class="kv-k">E.164</span><span class="kv-v mono">${esc(d.e164_format||'—')}</span></div>
+        <div class="kv"><span class="kv-k">International</span><span class="kv-v mono">${esc(d.international_format||'—')}</span></div>
+        <div class="kv"><span class="kv-k">Timezones</span><span class="kv-v">${(d.timezones||[]).map(t=>esc(t)).join(', ')||'—'}</span></div>
+      </div>
+      ${tc}
+    </div>
+    ${d.phonenumbers_error?`<div class="note" style="margin-top:14px;border-left:3px solid var(--red)">⚠ ${esc(d.phonenumbers_error)}</div>`:''}
+    ${jsonUI(d)}`;
+  showR('phoneRes');
+}
+
+// ── 3. Username Module ──
+async function runUser(){
+  if(!requireCase()) return;
+  const v=document.getElementById('userInput').value.trim().replace(/^@/,'');
+  if(!v) return setErr('userInput','userErr','A target username is required.');
+  setErr('userInput','userErr','');
+  showL('userLoad'); hideR('userRes');
+  try{ renderUser(await api('/api/recon/username',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:v})})); }
+  catch(e){ toast(e.message); }
+  finally{ hideL('userLoad'); }
+}
+function renderUser(d){
+  const el=document.getElementById('userRes');
+  if(d.error||d.success===false){
+    el.innerHTML=`<div class="note">${esc(d.error||'Scan failed.')}</div>`;
+    showR('userRes'); return;
+  }
+  const found=d.found||[];
+  const checked=d.sites_checked||0;
+  const count=d.found_count||0;
+  const usFound=d.user_scanner_found||[];
+  const wmnNames=new Set(found.map(s=>(s.name||'').toLowerCase()));
+  const usOnly=usFound.filter(s=>!wmnNames.has((s.name||'').toLowerCase()));
+  const byCat={};
+  for(const s of found){
+    const c=s.category||'unknown';
+    (byCat[c]||(byCat[c]=[])).push(s);
+  }
+  let matchesH='';
+  for(const [cat, sites] of Object.entries(byCat)){
+    matchesH+=`<div class="sub-label">${esc(cat)}</div><div class="chips" style="margin-bottom:16px">${sites.map(s=>`<a href="${esc(s.url||'#')}" target="_blank" rel="noopener" class="chip chip-hit"><span class="cdot"></span>${esc(s.name||'Unknown')}</a>`).join('')}</div>`;
+  }
+  if(usOnly.length){
+    matchesH+=`<details style="margin-top:8px"><summary class="sub-label" style="cursor:pointer;display:inline-block">Extended Platform Scan (user-scanner · ${usOnly.length})</summary><div class="chips" style="margin-top:10px;margin-bottom:16px">${usOnly.map(s=>{
+      const extra=s.extra&&Object.keys(s.extra).length?` title="${esc(Object.entries(s.extra).slice(0,4).map(([k,v])=>k+': '+v).join('; '))}"`:'';
+      return `<a href="${esc(s.url||'#')}" target="_blank" rel="noopener"${extra} class="chip chip-hit"><span class="cdot"></span>${esc(s.name||'Unknown')}</a>`;
+    }).join('')}</div></details>`;
+  }
+  el.innerHTML=`
+    <div class="stats">
+      <div class="stat"><div class="stat-n">${checked}</div><div class="stat-l">Sites Queried</div></div>
+      <div class="stat"><div class="stat-n" style="color:var(--green)">${count}</div><div class="stat-l">Positive Matches</div></div>
+      <div class="stat"><div class="stat-n" style="color:var(--text-quaternary)">${checked-count}</div><div class="stat-l">Null Results</div></div>
+    </div>
+    ${matchesH||'<div class="note">No accounts found on scanned sites.</div>'}
+    ${jsonUI(d)}`;
+  showR('userRes');
+}
+
+// ── 4. Domain Module ──
+async function runDomain(){
+  const v=document.getElementById('domainInput').value.trim();
+  if(!v) return setErr('domainInput','domainErr','Target domain is required.');
+  setErr('domainInput','domainErr','');
+  showL('domainLoad'); hideR('domainRes');
+  try{ renderDomain(await api(`/api/domain?url=${encodeURIComponent(v)}`)); }
+  catch(e){ toast(e.message); }
+  finally{ hideL('domainLoad'); }
+}
+function renderDomain(d){
+  const el=document.getElementById('domainRes');
+  const fl=d.threat_summary?.flagged, notes=d.threat_summary?.notes||[];
+  const dns=d.dns_records||{};
+  let dnsH='';
+  for(const[t,vals]of Object.entries(dns)){
+    if(!vals?.length) continue;
+    dnsH+=`<div class="panel"><div class="panel-label">${esc(t)} Records</div>${vals.map(v=>`<div style="font-family:var(--mono);font-size:12px;color:var(--text-secondary);word-break:break-all;padding:3px 0">${esc(v)}</div>`).join('')}</div>`;
+  }
+  const sh=d.security_headers||{};
+  let shH=Object.entries(sh).map(([k,v])=>`<div style="display:flex;gap:8px;align-items:baseline;font-size:13px;padding:4px 0"><span class="pill pill-green" style="font-size:9px;padding:2px 5px">✓</span><span style="color:var(--text-secondary);font-weight:500">${esc(k)}</span><span style="color:var(--text-tertiary);font-family:var(--mono);font-size:11px;word-break:break-all">${esc(v)}</span></div>`).join('');
+  const mh=(d.missing_headers||[]).map(h=>`<div style="display:flex;gap:8px;align-items:center;font-size:13px;padding:4px 0"><span class="pill pill-red" style="font-size:9px;padding:2px 5px">✗</span><span style="color:var(--text-tertiary)">${esc(h)}</span></div>`).join('');
+  const tn=notes.length?notes.map(n=>`<div style="font-size:13px;color:var(--text-tertiary);padding:3px 0">· ${esc(n)}</div>`).join(''):'<div style="font-size:13px;color:var(--text-quaternary)">No security anomalies detected.</div>';
+  el.innerHTML=`
+    <header class="res-header">
+      <div><div class="res-title">${esc(d.domain||'')}</div><div class="res-sub" style="font-family:var(--mono);font-size:11.5px">${esc(d.ip_address||'—')}</div></div>
+      <div style="display:flex;gap:6px">${d.http_status_code?`<span class="pill pill-dim">HTTP ${d.http_status_code}</span>`:''}<span class="pill ${fl?'pill-orange':'pill-green'}">${fl?'Flagged':'Clean'}</span></div>
+    </header>
+    ${dnsH?`<div class="sub-label" style="margin-top:20px">DNS Records</div><div class="data-grid">${dnsH}</div>`:''}
+    ${shH?`<div class="sub-label" style="margin-top:20px">Security Headers</div><div class="panel">${shH}${mh}</div>`:''}
+    ${tn?`<div class="sub-label" style="margin-top:20px">Threat Assessment</div><div class="panel">${tn}</div>`:''}
+    ${d.server_software?`<div class="note" style="margin-top:14px">Server: <code style="font-family:var(--mono);font-size:11.5px;color:var(--accent)">${esc(d.server_software)}</code></div>`:''}
+    ${(d.subdomains?.length)?`<div class="sub-label" style="margin-top:20px">Discovered Subdomains <span class="pill pill-dim" style="margin-left:5px">${d.subdomains.length}</span></div><div class="panel"><div class="chips">${d.subdomains.map(s=>`<a class="pill pill-dim" href="https://${esc(s)}" target="_blank" rel="noopener noreferrer" style="font-family:var(--mono);font-size:10.5px;text-transform:none;text-decoration:none">${esc(s)}</a>`).join('')}</div></div>`:''}
+    ${jsonUI(d)}`;
+  showR('domainRes');
+}
+
+// ── 5. Email Module ──
+async function runEmail(){
+  const v=document.getElementById('emailInput').value.trim();
+  if(!v) return setErr('emailInput','emailErr','Target email is required.');
+  setErr('emailInput','emailErr','');
+  showL('emailLoad'); hideR('emailRes');
+  try{ renderEmail(await api(`/api/email?email=${encodeURIComponent(v)}&supplementary=1`)); }
+  catch(e){ toast(e.message); }
+  finally{ hideL('emailLoad'); }
+}
+function emailHitChip(p){
+  const label=esc(p.name||p.site_name||p.domain||'Unknown');
+  const href=p.url||'';
+  const lt=p.link_type||'';
+  const badgeCls=lt==='profile'?'pill-green':lt==='recovery'?'pill-orange':'pill-dim';
+  const badgeTxt=lt==='profile'?'Profile':lt==='recovery'?'Recovery':lt==='platform_home'?'Registered':'';
+  const subs=[];
+  if(lt==='recovery') subs.push('email confirmed registered');
+  if(p.username) subs.push('username: '+esc(p.username));
+  if(p.extra_summary) subs.push(esc(p.extra_summary));
+  const subHtml=subs.length?`<div style="font-size:10.5px;color:var(--text-quaternary);margin-top:2px;line-height:1.35">${subs.join(' · ')}</div>`:'';
+  const badge=badgeTxt?`<span class="pill ${badgeCls}" style="font-size:8.5px;padding:1px 5px;margin-left:6px;vertical-align:middle">${badgeTxt}</span>`:'';
+  const inner=`<span class="cdot"></span>${label}${badge}${subHtml}`;
+  if(href){
+    return `<a class="chip chip-hit" href="${esc(href)}" target="_blank" rel="noopener noreferrer" style="text-decoration:none;display:inline-flex;flex-direction:column;align-items:flex-start;gap:0">${inner}</a>`;
+  }
+  return `<div class="chip chip-hit" style="display:inline-flex;flex-direction:column;align-items:flex-start;gap:0">${inner}</div>`;
+}
+function renderEmail(d){
+  const el=document.getElementById('emailRes');
+  if(d.error&&!d.registered_on){
+    el.innerHTML=`<div class="note">${esc(d.error)}${d.resolution?`<br><span style="font-size:11.5px;color:var(--text-quaternary);display:block;margin-top:6px">${esc(d.resolution)}</span>`:''}</div>
+    ${d.mock_response?`<div class="sub-label" style="margin-top:14px">Demonstration Data</div><div class="chips">${(d.mock_response.registered_on||[]).map(p=>emailHitChip(p)).join('')}</div>`:''}
+    ${jsonUI(d)}`;
+    showR('emailRes'); return;
+  }
+  const reg=d.registered_on||[], rc=d.registered_count||reg.length, tc=d.platforms_checked||0, rl=d.rate_limited_count||0, nr=d.not_registered_count||0;
+  const supp=d.supplementary||{}, sreg=supp.registered_on||[];
+  const us=d.user_scanner||{}, usreg=us.registered_unique||us.registered||[];
+  el.innerHTML=`
+    <div class="stats">
+      <div class="stat"><div class="stat-n">${tc}</div><div class="stat-l">Nodes Queried</div></div>
+      <div class="stat"><div class="stat-n" style="color:var(--green)">${rc}</div><div class="stat-l">Registrations</div></div>
+      <div class="stat"><div class="stat-n" style="color:var(--text-quaternary)">${nr}</div><div class="stat-l">Unregistered</div></div>
+      <div class="stat"><div class="stat-n" style="color:var(--orange)">${rl}</div><div class="stat-l">Rate Limited</div></div>
+    </div>
+    ${reg.length?`<div class="sub-label">Registered Platforms (holehe)</div><div class="chips">${reg.map(p=>emailHitChip(p)).join('')}</div>`:`<div class="note">No active registrations detected.</div>`}
+    ${usreg.length?`<details style="margin-top:14px"><summary class="sub-label" style="cursor:pointer;display:inline-block">Extended Platform Scan (user-scanner · ${usreg.length})</summary><div class="chips" style="margin-top:10px">${usreg.map(p=>emailHitChip(p)).join('')}</div></details>`:''}
+    ${sreg.length?`<div class="sub-label" style="margin-top:14px">Supplementary Probes</div><div class="chips">${sreg.map(p=>emailHitChip(p)).join('')}</div>`:''}
+    ${jsonUI(d)}`;
+  showR('emailRes');
+}
+
+// ── 6. Breach Module ──
+async function runBreach(){
+  const v=document.getElementById('breachInput').value.trim();
+  if(!v) return setErr('breachInput','breachErr','Email address is required.');
+  setErr('breachInput','breachErr','');
+  showL('breachLoad'); hideR('breachRes');
+  try{
+    const [breach, inf]=await Promise.all([
+      api(`/api/breach?email=${encodeURIComponent(v)}`),
+      api(`/api/infostealer?email=${encodeURIComponent(v)}`).catch(()=>null)
+    ]);
+    renderBreach(breach, inf);
+  }
+  catch(e){ toast(e.message); }
+  finally{ hideL('breachLoad'); }
+}
+function renderBreach(d, infostealer){
+  const el=document.getElementById('breachRes');
+  if(d.error){
+    el.innerHTML=`<div class="note" style="border-left:3px solid var(--red)">⚠ ${esc(d.error)}</div>`;
+    showR('breachRes'); return;
+  }
+  const safe=d.status==='safe';
+  let det='';
+  const breachSrc=d.breach_data||d.breaches;
+  if(!safe&&breachSrc){
+    const bd=Array.isArray(breachSrc)?breachSrc:(breachSrc.breaches_details||[]);
+    if(bd.length){
+      det=bd.map(b=>{
+        const nm=b.breach||b.name||b.domain||'Unknown', ds=b.details||b.description||'', dt=b.xposed_date||b.date||'Unknown', rc=b.xposed_records||'Unknown', tg=b.xposed_data?b.xposed_data.split(';').map(t=>t.trim()).filter(Boolean):[];
+        return`<article class="breach-item"><header style="display:flex;justify-content:space-between;align-items:start"><h3 class="breach-name">${esc(nm)}</h3><span class="pill pill-red">Compromised</span></header>${ds?`<div class="breach-desc">${esc(ds)}</div>`:''}<div class="breach-meta"><div>Records: <strong>${isNaN(rc)?rc:Number(rc).toLocaleString()}</strong></div><div>Date: <strong>${esc(dt)}</strong></div>${b.password_risk?`<div>Risk: <strong>${esc(b.password_risk)}</strong></div>`:''}</div>${tg.length?`<div class="breach-tags">${tg.map(t=>`<span class="breach-tag">${esc(t)}</span>`).join('')}</div>`:''}</article>`;
+      }).join('');
+    }
+  }
+  let infHtml='';
+  if(infostealer&&infostealer.success&&infostealer.infection_count>0){
+    infHtml=`<div class="sub-label" style="margin-top:16px">Infostealer Intelligence (Hudson Rock)</div>`+
+      infostealer.infections.map((inf,i)=>`<article class="breach-item"><header style="display:flex;justify-content:space-between;align-items:start"><h3 class="breach-name">Infection ${i+1}: ${esc(inf.stealer_family||'Unknown')}</h3><span class="pill pill-red">Infostealer</span></header><div class="breach-meta"><div>Date: <strong>${esc(inf.date_compromised||'Unknown')}</strong></div><div>OS: <strong>${esc(inf.operating_system||'Unknown')}</strong></div>${inf.top_logins&&inf.top_logins.length?`<div>Sample logins: <strong>${esc(inf.top_logins.slice(0,3).join(', '))}</strong></div>`:''}</div></article>`).join('');
+  }else if(infostealer&&infostealer.success&&infostealer.status==='clean'){
+    infHtml=`<div class="note" style="margin-top:12px">Hudson Rock: no infostealer infections associated with this email.</div>`;
+  }
+  el.innerHTML=`
+    <header class="res-header" style="margin-bottom:16px">
+      <div><div class="res-title">${esc(d.email||'')}</div><div class="res-sub">${safe?'No breach records identified':'Matches found in leaked databases'}</div></div>
+      <span class="pill ${safe?'pill-green':'pill-red'}">${safe?'Secure':'Compromised'}</span>
+    </header>
+    ${det}
+    ${infHtml}
+    ${d.message?`<div class="note">${esc(d.message)}</div>`:''}
+    ${jsonUI(d)}`;
+  showR('breachRes');
+}
+
+// ── 7. Dorking ──
+function buildDork(){
+  const q=document.getElementById('query').value, ft=document.getElementById('fileType').value;
+  if(!q) return '';
+  const ex={video:'+(mkv|mp4|avi|mov|mpg|wmv)',books:'+(MOBI|CBZ|CBR|CBC|CHM|EPUB|FB2|LIT|LRF|ODT|PDF|PRC|PDB|PML|RB|RTF|TCR|DOC|DOCX)',music:'+(mp3|wav|flac|ogg|wma|m4a)',software:'+(exe|iso|dmg|tar|7z|bz2|apk|rar|zip)',images:'+(jpg|png|bmp|gif|tif|tiff|psd)'};
+  const base='-inurl:(jsp|pl|php|html|aspx|htm|cf|shtml) intitle:index.of -inurl:(listen77|mp3raid|mp3toss|mp3drug|index_of|index-of|wallywashis|downloadmana)';
+  return q+(ex[ft]?' '+ex[ft]:'')+' '+base;
+}
+function updatePreview(){
+  document.getElementById('queryPreview').textContent=buildDork()||'Awaiting keyword input to synthesize payload.';
+}
+function debounce(fn,ms){let t;return function(){clearTimeout(t);t=setTimeout(()=>fn.apply(this,arguments),ms);};}
+const _debouncedPreview=debounce(updatePreview,120);
+document.getElementById('query').addEventListener('input',_debouncedPreview);
+document.getElementById('fileType').addEventListener('change',updatePreview);
+function startSearch(){
+  const q=document.getElementById('query').value.trim(), ft=document.getElementById('fileType').value, eng=document.getElementById('engine').value;
+  if(!q) return setErr('query','queryErr','A search query is required.');
+  setErr('query','queryErr','');
+  const dk=buildDork();
+  const urls={google:'https://www.google.com/search?q=',googol:'https://googol.warriordudimanche.net/?q=',startpage:'https://www.startpage.com/do/dsearch?query=',searx:'https://searx.me/?q='};
+  if(eng==='filepursuit'){window.open('https://filepursuit.com/search/'+encodeURIComponent(q)+'/type/'+ft,'_blank');return;}
+  window.open((urls[eng]||urls.google)+encodeURIComponent(dk),'_blank');
+}
+
+// ── Settings / API Vault ──
+function showSettingsTab(name, btn) {
+  document.querySelectorAll('.settings-tab').forEach(t => t.classList.remove('on'));
+  document.querySelectorAll('.settings-panel').forEach(p => p.classList.remove('visible'));
+  if (btn) btn.classList.add('on');
+  else document.querySelector(`.settings-tab[data-tab="${name}"]`)?.classList.add('on');
+  document.getElementById('settings' + name.charAt(0).toUpperCase() + name.slice(1))?.classList.add('visible');
+  if (name === 'users') loadUsersList();
+}
+
+async function openVault() {
+  document.getElementById('vaultModal').classList.add('visible');
+  showSettingsTab('keys', document.querySelector('.settings-tab[data-tab="keys"]'));
+  try { await api('/api/vault/keys'); } catch(e) { toast(e.message); }
+}
+function closeVault() { document.getElementById('vaultModal').classList.remove('visible'); }
+
+async function loadUsersList() {
+  const panel = document.getElementById('userListPanel');
+  if (!panel) return;
+  try {
+    const d = await api('/api/auth/profiles');
+    const profiles = d.profiles || [];
+    panel.innerHTML = profiles.length
+      ? profiles.map(p => `<div class="user-row"><span class="mono">${esc(p.display_name)}</span><span>${esc(p.role)}</span></div>`).join('')
+      : '<div class="note">No profiles yet.</div>';
+  } catch(e) {
+    panel.innerHTML = `<div class="note">${esc(e.message)}</div>`;
+  }
+}
+
+async function addUserAccount() {
+  const display_name = document.getElementById('newUserName').value.trim();
+  const role = document.getElementById('newUserRole').value;
+  if (!display_name) return toast('Display name required.', 'err');
+  try {
+    await api('/api/auth/profiles', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({display_name, role})
+    });
+    document.getElementById('newUserName').value = '';
+    toast(`Profile ${display_name} created.`, 'ok');
+    await loadUsersList();
+  } catch(e) { toast(e.message); }
+}
+
+async function saveVault() {
+  const abuse=document.getElementById('abuseKey').value.trim();
+  const vt=document.getElementById('vtKey').value.trim();
+  const tc=document.getElementById('tcVaultKey').value.trim();
+  try {
+    if (abuse) await api('/api/vault/keys', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({service:'abuse', value:abuse})});
+    if (vt) await api('/api/vault/keys', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({service:'vt', value:vt})});
+    if (tc) await api('/api/vault/keys', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({service:'truecaller', value:tc})});
+    closeVault();
+    toast('API Vault secured on server.','ok');
+    await refreshVaultStatus();
+  } catch(e) { toast(e.message); }
+}
+
+// ── Tally logic ──
+function getResetTimeStr() {
+  const now=new Date(), midnight=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate()+1));
+  const diff=midnight-now, h=Math.floor(diff/3600000), m=Math.floor((diff%3600000)/60000);
+  return `${h}h ${m}m`;
+}
+setInterval(()=>document.querySelectorAll('.tally-reset-time').forEach(e=>e.textContent=getResetTimeStr()),60000);
+document.querySelectorAll('.tally-reset-time').forEach(e=>e.textContent=getResetTimeStr());
+function updateTally(api,used,total){
+  const pct=total>0?Math.min(100,Math.round((used/total)*100)):0;
+  document.getElementById(`${api}Pct`).textContent=`${pct}%`;
+  document.getElementById(`${api}Fill`).style.width=`${pct}%`;
+  document.getElementById(`${api}Thumb`).style.left=`${pct}%`;
+  document.getElementById(`${api}LimitTxt`).textContent=`${used} / ${total}`;
+}
+function getVTUsage(){
+  try{const s=JSON.parse(localStorage.getItem('vtUsage')||'{"count":0,"date":""}');const today=new Date().toISOString().split('T')[0];if(s.date!==today)return 0;return s.count||0;}catch{return 0;}
+}
+function incrementVTUsage(){
+  const count=getVTUsage()+1, today=new Date().toISOString().split('T')[0];
+  localStorage.setItem('vtUsage',JSON.stringify({count,date:today}));
+  return count;
+}
+updateTally('vt',getVTUsage(),500);
+
+async function runAbuseIP() {
+  if(!requireCase()) return;
+  const target=document.getElementById('abuseTarget').value.trim();
+  if(!target) return setErr('abuseTarget','abuseErr','Target IP is required.');
+  setErr('abuseTarget','abuseErr','');
+  showL('abuseLoad'); hideR('abuseRes');
+  try{
+    const r=await fetch('/api/scan-abuseip',{method:'POST',credentials:'include',headers:{..._apiBaseHeaders(),'Content-Type':'application/json'},body:JSON.stringify({target})});
+    const d=await r.json();
+    if(!r.ok||d.error) throw new Error(d.error||'AbuseIPDB scan failed');
+    if(d.quota_tracker){const rem=Number(d.quota_tracker.remaining)||0,lim=Number(d.quota_tracker.limit)||1000;updateTally('abuse',Math.max(0,lim-rem),lim);}
+    document.getElementById('abuseRes').innerHTML=`<div class="panel"><div class="panel-label">AbuseIPDB Report</div>
+      <div class="kv"><span class="kv-k">Confidence Score</span><span class="kv-v"${d.data?.abuseConfidenceScore>0?' style="color:var(--red)"':''}>${d.data?.abuseConfidenceScore||0}%</span></div>
+      <div class="kv"><span class="kv-k">Total Reports</span><span class="kv-v">${d.data?.totalReports||0}</span></div>
+      <div class="kv"><span class="kv-k">Domain</span><span class="kv-v">${esc(d.data?.domain||'—')}</span></div>
+      <div class="kv"><span class="kv-k">Usage Type</span><span class="kv-v">${esc(d.data?.usageType||'—')}</span></div>
+      <div class="kv"><span class="kv-k">ISP</span><span class="kv-v">${esc(d.data?.isp||'—')}</span></div>
+    </div>${jsonUI(d)}`;
+    showR('abuseRes');
+  }catch(e){
+    if(e.message.includes('API key locked or missing') || e.message.includes('Unauthorized') || e.message.includes('401')){
+      const key = prompt("AbuseIPDB API key is missing.\n\nTo get one:\n1. Go to https://www.abuseipdb.com/\n2. Sign up/Log in\n3. Navigate to API -> Create Key\n\nPaste your key here to save it to the vault:");
+      if (key && key.trim()) {
+        try {
+          await api('/api/vault/keys', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({service:'abuse', value:key.trim()})});
+          toast("AbuseIPDB key saved to vault. Retrying scan...", "ok");
+          return runAbuseIP();
+        } catch(saveErr) {
+          toast("Failed to save key: " + saveErr.message, "err");
+        }
+      }
+    }
+    toast(e.message);
+  }finally{hideL('abuseLoad');}
+}
+
+async function runVirusTotal() {
+  if(!requireCase()) return;
+  const target=document.getElementById('vtTarget').value.trim();
+  if(!target) return setErr('vtTarget','vtErr','Target IP is required.');
+  setErr('vtTarget','vtErr','');
+  showL('vtLoad'); hideR('vtRes');
+  try{
+    const r=await fetch('/api/scan-virustotal',{method:'POST',credentials:'include',headers:{..._apiBaseHeaders(),'Content-Type':'application/json'},body:JSON.stringify({target})});
+    const d=await r.json();
+    if(!r.ok||d.error) throw new Error(d.error||'VirusTotal scan failed');
+    const newUsed=incrementVTUsage();updateTally('vt',newUsed,500);
+    const stats=d.data?.attributes?.last_analysis_stats||{};
+    document.getElementById('vtRes').innerHTML=`<div class="panel"><div class="panel-label">VirusTotal Analysis</div>
+      <div class="kv"><span class="kv-k">Malicious</span><span class="kv-v"${stats.malicious>0?' style="color:var(--red)"':''}>${stats.malicious||0}</span></div>
+      <div class="kv"><span class="kv-k">Suspicious</span><span class="kv-v"${stats.suspicious>0?' style="color:var(--orange)"':''}>${stats.suspicious||0}</span></div>
+      <div class="kv"><span class="kv-k">Harmless</span><span class="kv-v" style="color:var(--green)">${stats.harmless||0}</span></div>
+      <div class="kv"><span class="kv-k">Undetected</span><span class="kv-v">${stats.undetected||0}</span></div>
+    </div>${jsonUI(d)}`;
+    showR('vtRes');
+  }catch(e){
+    if(e.message.includes('API key locked or missing') || e.message.includes('Unauthorized') || e.message.includes('401')){
+      const key = prompt("VirusTotal API key is missing.\n\nTo get one:\n1. Go to https://www.virustotal.com/\n2. Sign up/Log in\n3. Click your username -> API key\n\nPaste your key here to save it to the vault:");
+      if (key && key.trim()) {
+        try {
+          await api('/api/vault/keys', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({service:'vt', value:key.trim()})});
+          toast("VirusTotal key saved to vault. Retrying scan...", "ok");
+          return runVirusTotal();
+        } catch(saveErr) {
+          toast("Failed to save key: " + saveErr.message, "err");
+        }
+      }
+    }
+    toast(e.message);
+  }finally{hideL('vtLoad');}
+}
+
+// ── Network Tools ──
+async function runSpiderwebPort() {
+  const target=document.getElementById('swPortInput').value.trim();
+  if(!target) return toast('Target IP is required','err');
+  showL('swPortLoad'); hideR('swPortRes');
+  try{
+    const d=await api('/api/scan/ports',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ip:target})});
+    let ports=d.results&&d.results.length?d.results.map(p=>`<div class="kv"><span class="kv-k mono">Port ${p.port} (${p.service})</span><span class="kv-v" style="color:var(--green)">OPEN</span></div>`).join(''):'<div class="note">No open ports found.</div>';
+    document.getElementById('swPortRes').innerHTML=`<div class="panel"><div class="panel-label">Open Ports · ${d.target}</div>${ports}</div>${jsonUI(d)}`;
+    showR('swPortRes');
+  }catch(e){toast(e.message);}finally{hideL('swPortLoad');}
+}
+
+async function runSpiderwebSub() {
+  const target=document.getElementById('swSubInput').value.trim();
+  if(!target) return toast('Domain is required','err');
+  showL('swSubLoad'); hideR('swSubRes');
+  try{
+    const d=await api('/api/subdomain',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({domain:target})});
+    const results=d.results||d.ct_subdomains||[];
+    const total=d.subdomain_count||d.total||results.length;
+    const live=d.live_subdomain_count||0;
+    if(d.error&&!results.length){
+      document.getElementById('swSubRes').innerHTML=`<div class="note" style="border-left:3px solid var(--red)">${esc(d.error)}</div>${jsonUI(d)}`;
+    } else {
+      let subs=results.length?results.map(s=>{
+        const host=s.subdomain||s.url||'', url=s.url||`https://${host}`, liveBadge=s.live?`<span class="pill pill-green" style="font-size:10px;margin-left:6px">LIVE</span>`:'';
+        return`<div class="kv"><a class="kv-k mono" href="${esc(url)}" target="_blank" rel="noopener noreferrer" style="color:var(--green);text-decoration:none">${esc(host)}</a><span class="kv-v">${liveBadge||'<span style="color:var(--text-quaternary)">CT log</span>'}</span></div>`;
+      }).join(''):'<div class="note">No subdomains found.</div>';
+      document.getElementById('swSubRes').innerHTML=`<div class="panel"><div class="panel-label">Discovered Subdomains · ${total} CT · ${live} live DNS</div>${subs}</div>${jsonUI(d)}`;
+    }
+    showR('swSubRes');
+  }catch(e){toast(e.message);}finally{hideL('swSubLoad');}
+}
+
+async function runSpiderwebNet() {
+  const target=document.getElementById('swNetInput').value.trim();
+  if(!target) return toast('CIDR block is required','err');
+  showL('swNetLoad'); hideR('swNetRes');
+  try{
+    const d=await api('/api/scan/network',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cidr:target})});
+    let hosts=d.results&&d.results.length?d.results.map(h=>`<div class="kv"><span class="kv-k mono">${h.ip} (${h.hostname})</span><span class="kv-v" style="color:var(--green)">ACTIVE</span></div>`).join(''):'<div class="note">No active hosts found.</div>';
+    document.getElementById('swNetRes').innerHTML=`<div class="panel"><div class="panel-label">Active Hosts</div>${hosts}</div>${jsonUI(d)}`;
+    showR('swNetRes');
+  }catch(e){toast(e.message);}finally{hideL('swNetLoad');}
+}
+
+async function pollCrackJob(statusUrl, onProgress) {
+  while (true) {
+    const d = await fetch(statusUrl, {credentials:'include', headers:_apiBaseHeaders()}).then(r=>r.json());
+    if (onProgress) onProgress(d);
+    if (['success', 'failed', 'error', 'done'].includes(d.status)) return d;
+    await new Promise(r => setTimeout(r, 500));
+  }
+}
+
+function updateCrackProgressUI(prefix, d) {
+  const fill = document.getElementById(prefix + 'ProgressFill');
+  const line = document.getElementById(prefix + 'ProgressLine');
+  const box = document.getElementById(prefix + 'Progress');
+  if (!fill || !line || !box) return;
+  box.classList.add('visible');
+  const pct = d.total ? Math.min(100, (d.tried / d.total) * 100) : 0;
+  fill.style.width = pct.toFixed(1) + '%';
+  line.textContent = d.progress_line || `Tried: ${(d.tried || 0).toLocaleString()} / ${(d.total || 0).toLocaleString()}`;
+}
+
+async function runSpiderwebHash() {
+  if(!requireCase()) return;
+  const target=document.getElementById('swHashInput').value.trim();
+  if(!target) return toast('Hash string is required','err');
+  showL('swHashLoad'); hideR('swHashRes');
+  document.getElementById('swHashProgress')?.classList.remove('visible');
+  try{
+    let type=document.getElementById('swHashType').value;
+    if(type==='auto'){
+      if(target.length===32) type='md5';
+      else if(target.length===40) type='sha1';
+      else if(target.length===64) type='sha256';
+      else if(target.length===128) type='sha512';
+      else type='md5';
+    }
+    const salt=document.getElementById('swHashSalt').value.trim();
+    const salt_mode=document.getElementById('swHashSaltMode').value;
+    const payload={hash:target,type};
+    if(salt){ payload.salt=salt; payload.salt_mode=salt_mode; }
+    const start = await api('/api/crack/hash',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    if (!start.job_id) throw new Error(start.error || 'Failed to start hash crack');
+    const d = await pollCrackJob(`/api/crack/hash/status/${start.job_id}`, (p) => updateCrackProgressUI('swHash', p));
+    if(d.status === 'success'){
+      document.getElementById('swHashRes').innerHTML=`<div class="panel"><div class="panel-label">Hash Cracked</div><div class="kv"><span class="kv-k">Hash (${d.hash_type || type})</span><span class="kv-v mono">${esc(target)}</span></div><div class="kv"><span class="kv-k">Plaintext</span><span class="kv-v" style="color:var(--green);font-family:var(--mono);font-size:16px">${esc(d.password)}</span></div></div>`;
+    }else{
+      document.getElementById('swHashRes').innerHTML=`<div class="note" style="border-left:3px solid var(--orange)">${esc(d.message || d.error || 'Password not found')}</div>`;
+    }
+    showR('swHashRes');
+  }catch(e){toast(e.message);}finally{hideL('swHashLoad');}
+}
+
+async function runPdfProtect() {
+  const fi=document.getElementById('pdfProtectFile'), pi=document.getElementById('pdfProtectPass');
+  if(!fi.files.length) return toast('PDF file is required','err');
+  if(!pi.value) return toast('Password is required','err');
+  const fd=new FormData();
+  fd.append('file',fi.files[0]); fd.append('password',pi.value);
+  try{
+    const r=await fetch('/api/pdf/protect',{method:'POST',credentials:'include',headers:_apiBaseHeaders(),body:fd});
+    if(!r.ok){const d=await r.json().catch(()=>null);throw new Error(d?.error||'Encryption failed');}
+    const blob=await r.blob(), url=window.URL.createObjectURL(blob), a=document.createElement('a');
+    a.href=url; a.download='protected.pdf'; document.body.appendChild(a); a.click();
+    window.URL.revokeObjectURL(url); a.remove();
+    toast('PDF encrypted and downloaded.','ok');
+  }catch(e){toast(e.message);}
+}
+
+async function runPdfCrack() {
+  const fi=document.getElementById('pdfCrackFile');
+  const wlfi=document.getElementById('pdfCrackWordlistFile');
+  if(!fi.files.length) return toast('PDF file is required','err');
+  showL('pdfCrackLoad'); hideR('pdfCrackRes');
+  document.getElementById('pdfCrackProgress')?.classList.remove('visible');
+  const fd=new FormData();
+  fd.append('file', fi.files[0]);
+  if (wlfi && wlfi.files.length) fd.append('wordlist_file', wlfi.files[0]);
+  try{
+    const r=await fetch('/api/pdf/crack',{method:'POST',credentials:'include',headers:_apiBaseHeaders(),body:fd});
+    const start=await r.json();
+    if(!r.ok) throw new Error(start.error||'Failed to analyze PDF');
+    if(start.error && !start.job_id) throw new Error(start.error);
+    if (!start.job_id) throw new Error('Failed to start crack job');
+
+    const wlEl = document.getElementById('pdfCrackWordlist');
+    if (wlEl && start.wordlist) {
+      wlEl.textContent = `Dictionary: ${start.wordlist} (${Number(start.entries || start.total || 0).toLocaleString()} passwords)`;
+    }
+
+    const d = await pollCrackJob(`/api/pdf/crack/status/${start.job_id}`, (p) => updateCrackProgressUI('pdfCrack', p));
+    const wlLabel = d.wordlist ? `Dictionary: ${esc(d.wordlist)}${d.entries || d.total ? ` (${Number(d.entries || d.total).toLocaleString()} entries)` : ''}` : '';
+    if(d.status === 'success'){
+      document.getElementById('pdfCrackRes').innerHTML=`<div class="panel"><div class="panel-label">Password Recovered</div>${wlLabel ? `<div class="note" style="margin-bottom:8px;font-size:12px">${wlLabel}</div>` : ''}<div class="kv"><span class="kv-k">Password</span><span class="kv-v" style="color:var(--green);font-family:var(--mono);font-size:16px">${esc(d.password)}</span></div></div>`;
+    }else{
+      document.getElementById('pdfCrackRes').innerHTML=`<div class="note" style="border-left:3px solid var(--orange)">${esc(d.message||d.error||'Password not found in dictionary')}${wlLabel ? `<br><span style="opacity:.85;font-size:12px">${wlLabel}</span>` : ''}</div>`;
+    }
+    showR('pdfCrackRes');
+  }catch(e){toast(e.message);}finally{hideL('pdfCrackLoad');}
+}
+
+async function loadPdfCrackWordlistInfo() {
+  const el = document.getElementById('pdfCrackWordlist');
+  if (!el) return;
+  const wlfi = document.getElementById('pdfCrackWordlistFile');
+  if (wlfi) {
+    wlfi.addEventListener('change', () => {
+      if (wlfi.files.length) {
+        el.textContent = `Dictionary: ${wlfi.files[0].name} (custom upload)`;
+      } else {
+        loadPdfCrackWordlistInfo();
+      }
+    });
+  }
+  try {
+    const d = await api('/api/wordlist/info');
+    if (d.success && d.available) {
+      el.textContent = `Dictionary: ${d.name} (${Number(d.line_count || d.entries).toLocaleString()} passwords)`;
+    } else {
+      el.textContent = 'Dictionary: rockyou.txt not found — place it in the project root';
+    }
+  } catch (_) {
+    el.textContent = 'Dictionary: rockyou.txt (default offline wordlist)';
+  }
+}
+loadPdfCrackWordlistInfo();
+
+// ── Advanced Recon modules ──
+function _renderGeneric(elId, d) {
+  const el=document.getElementById(elId);
+  el.innerHTML=`<div class="panel"><div class="panel-label">Results</div><div class="term-box">${esc(JSON.stringify(d,null,2))}</div></div>${jsonUI(d)}`;
+  showR(elId);
+}
+async function runEmailGoogle(){
+  if(!requireCase()) return;
+  const v=document.getElementById('emailGoogleInput').value.trim();
+  if(!v) return toast('Email required','err');
+  showL('emailGoogleLoad'); hideR('emailGoogleRes');
+  try{ _renderGeneric('emailGoogleRes', await api('/api/recon/email/google',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:v})})); }
+  catch(e){toast(e.message);} finally{hideL('emailGoogleLoad');}
+}
+async function runEmailSmtp(){
+  if(!requireCase()) return;
+  const v=document.getElementById('emailSmtpInput').value.trim();
+  if(!v) return toast('Email required','err');
+  showL('emailSmtpLoad'); hideR('emailSmtpRes');
+  try{ _renderGeneric('emailSmtpRes', await api('/api/recon/email/smtp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:v})})); }
+  catch(e){toast(e.message);} finally{hideL('emailSmtpLoad');}
+}
+async function runAsyncPort(){
+  if(!requireCase()) return;
+  const v=document.getElementById('asyncPortInput').value.trim();
+  if(!v) return toast('Target required','err');
+  showL('asyncPortLoad'); hideR('asyncPortRes');
+  try{ _renderGeneric('asyncPortRes', await api('/api/recon/portscan-async',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({target:v})})); }
+  catch(e){toast(e.message);} finally{hideL('asyncPortLoad');}
+}
+async function runMacLookup(){
+  if(!requireCase()) return;
+  const v=document.getElementById('macInput').value.trim();
+  if(!v) return toast('MAC required','err');
+  showL('macLoad'); hideR('macRes');
+  try{ _renderGeneric('macRes', await api('/api/recon/mac',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mac:v})})); }
+  catch(e){toast(e.message);} finally{hideL('macLoad');}
+}
+
+async function runUsernameDork(){
+  if(!requireCase()) return;
+  const v=document.getElementById('dorkUserInput').value.trim().replace(/^@/,'');
+  if(!v) return setErr('dorkUserInput','dorkUserErr','Username is required.');
+  setErr('dorkUserInput','dorkUserErr','');
+  showL('dorkUserLoad'); hideR('dorkUserRes');
+  try{
+    const d=await api('/api/search/username',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:v})});
+    renderUsernameDork(d);
+  }catch(e){toast(e.message);} finally{hideL('dorkUserLoad');}
+}
+function renderUsernameDork(d){
+  const el=document.getElementById('dorkUserRes');
+  if(!d.success){
+    el.innerHTML=`<div class="note">${esc(d.error||'Search failed.')}</div>`;
+    showR('dorkUserRes'); return;
+  }
+  if((d.warnings||[]).length){
+    d.warnings.forEach(w=>toast(w,'warn',6000));
+  }
+  const google=d.google_dorks||{};
+  let googleH='';
+  for(const cat of (google.categories||[])){
+    googleH+=`<div class="sub-label">${esc(cat.name)}</div><div class="panel" style="margin-bottom:12px">`;
+    for(const dk of (cat.dorks||[])){
+      googleH+=`<div style="display:flex;gap:8px;align-items:baseline;padding:4px 0;font-size:13px"><span style="color:var(--text-secondary);min-width:110px">${esc(dk.label||'')}</span><a href="${esc(dk.url||'#')}" target="_blank" rel="noopener" style="font-family:var(--mono);font-size:11px;color:var(--accent);word-break:break-all">${esc(dk.url||'')}</a></div>`;
+    }
+    googleH+='</div>';
+  }
+  const links=d.combined_links||[];
+  let ddgH=links.length
+    ?`<div class="sub-label" style="margin-top:16px">DuckDuckGo Live Results</div><div class="chips">${links.map(l=>`<a class="chip chip-hit" href="${esc(l.url||'#')}" target="_blank" rel="noopener" style="text-decoration:none"><span class="cdot"></span>${esc(l.platform||'web')}: ${esc(l.title||l.url||'')}</a>`).join('')}</div>`
+    :'<div class="note" style="margin-top:16px">No DuckDuckGo live links returned.</div>';
+  el.innerHTML=`
+    <div class="stats">
+      <div class="stat"><div class="stat-n">${google.total||0}</div><div class="stat-l">Google Dorks</div></div>
+      <div class="stat"><div class="stat-n" style="color:var(--green)">${links.length}</div><div class="stat-l">DDG Links</div></div>
+    </div>
+    <div class="sub-label">Google Dork URLs</div>
+    ${googleH||'<div class="note">No Google dorks generated.</div>'}
+    ${ddgH}
+    ${jsonUI(d)}`;
+  showR('dorkUserRes');
+}
+
+async function runEmailSite(){
+  if(!requireCase()) return;
+  const v=document.getElementById('emailSiteInput').value.trim();
+  if(!v) return setErr('emailSiteInput','emailSiteErr','Domain is required.');
+  setErr('emailSiteInput','emailSiteErr','');
+  showL('emailSiteLoad'); hideR('emailSiteRes');
+  try{
+    const d=await api('/api/search/emails',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({domain:v})});
+    renderEmailSite(d);
+  }catch(e){toast(e.message);} finally{hideL('emailSiteLoad');}
+}
+function renderEmailSite(d){
+  const el=document.getElementById('emailSiteRes');
+  if(!d.success){
+    el.innerHTML=`<div class="note">${esc(d.error||'Harvest failed.')}</div>`;
+    showR('emailSiteRes'); return;
+  }
+  if((d.warnings||[]).length){
+    d.warnings.forEach(w=>toast(w,'warn',6000));
+  }
+  const emails=d.emails||[];
+  el.innerHTML=`
+    <div class="stats">
+      <div class="stat"><div class="stat-n" style="color:var(--green)">${emails.length}</div><div class="stat-l">Emails Found</div></div>
+      <div class="stat"><div class="stat-n">${(d.ddg_pages||[]).reduce((a,p)=>a+(p.pages_fetched||0),0)||(d.ddg_pages||[]).length}</div><div class="stat-l">DDG Pages</div></div>
+    </div>
+    ${d.google_dork_url?`<div class="sub-label">Google Dork (manual fallback)</div><div class="panel"><a href="${esc(d.google_dork_url)}" target="_blank" rel="noopener" style="font-family:var(--mono);font-size:11px;color:var(--accent);word-break:break-all">${esc(d.google_dork_url)}</a></div>`:''}
+    ${emails.length?`<div class="sub-label" style="margin-top:16px">Harvested Addresses</div><div class="chips">${emails.map(e=>`<span class="pill pill-dim" style="font-family:var(--mono);font-size:11px;text-transform:none">${esc(e)}</span>`).join('')}</div>`:'<div class="note" style="margin-top:16px">No emails extracted from DuckDuckGo results.</div>'}
+    ${jsonUI(d)}`;
+  showR('emailSiteRes');
+}
+
+async function runDomainCrawl(){
+  if(!requireCase()) return;
+  const v=document.getElementById('domainCrawlInput').value.trim();
+  if(!v) return setErr('domainCrawlInput','domainCrawlErr','Domain is required.');
+  setErr('domainCrawlInput','domainCrawlErr','');
+  showL('domainCrawlLoad'); hideR('domainCrawlRes');
+  try{
+    const d=await api('/api/recon/domain-crawl',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({domain:v,max_depth:2})});
+    renderDomainCrawl(d);
+  }catch(e){toast(e.message);} finally{hideL('domainCrawlLoad');}
+}
+function renderDomainCrawl(d){
+  const el=document.getElementById('domainCrawlRes');
+  if(!d.success){
+    el.innerHTML=`<div class="note">${esc(d.error||'Crawl failed.')}</div>`;
+    showR('domainCrawlRes'); return;
+  }
+  const emails=d.all_emails||[];
+  const pages=d.pages_crawled||[];
+  let pagesH=pages.slice(0,10).map(p=>`<div class="kv"><span class="kv-k">${esc(p.url||'')}</span><span class="kv-v">${esc(p.title||'—')} · ${(p.emails||[]).length} emails</span></div>`).join('');
+  if(pages.length>10) pagesH+=`<div class="note">… and ${pages.length-10} more pages</div>`;
+  el.innerHTML=`
+    <div class="stats">
+      <div class="stat"><div class="stat-n">${d.total_pages||0}</div><div class="stat-l">Pages Crawled</div></div>
+      <div class="stat"><div class="stat-n" style="color:var(--green)">${emails.length}</div><div class="stat-l">Emails Found</div></div>
+    </div>
+    ${emails.length?`<div class="sub-label" style="margin-top:16px">All Emails</div><div class="chips">${emails.map(e=>`<span class="pill pill-dim" style="font-family:var(--mono);font-size:11px;text-transform:none">${esc(e)}</span>`).join('')}</div>`:''}
+    ${pagesH?`<div class="sub-label" style="margin-top:16px">Pages</div><div class="panel">${pagesH}</div>`:''}
+    ${jsonUI(d)}`;
+  showR('domainCrawlRes');
+}
+
+async function runGithubIntel(){
+  if(!requireCase()) return;
+  const v=document.getElementById('githubIntelInput').value.trim().replace(/^@/,'');
+  if(!v) return setErr('githubIntelInput','githubIntelErr','Username or domain required.');
+  setErr('githubIntelInput','githubIntelErr','');
+  showL('githubIntelLoad'); hideR('githubIntelRes');
+  const body=v.includes('.')&&!v.includes('@')?{domain:v}:{username:v};
+  try{
+    const d=await api('/api/recon/github',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    renderGithubIntel(d);
+  }catch(e){toast(e.message);} finally{hideL('githubIntelLoad');}
+}
+function renderGithubIntel(d){
+  const el=document.getElementById('githubIntelRes');
+  if(!d.success){
+    el.innerHTML=`<div class="note">${esc(d.error||'GitHub intel failed.')}</div>`;
+    showR('githubIntelRes'); return;
+  }
+  if((d.warnings||[]).length) d.warnings.forEach(w=>toast(w,'warn',6000));
+  const emails=d.emails||[];
+  const repos=d.repos||[];
+  el.innerHTML=`
+    <div class="stats">
+      <div class="stat"><div class="stat-n" style="color:var(--green)">${emails.length}</div><div class="stat-l">Emails</div></div>
+      <div class="stat"><div class="stat-n">${repos.length}</div><div class="stat-l">Repos</div></div>
+    </div>
+    ${emails.length?`<div class="sub-label" style="margin-top:16px">Commit Emails</div><div class="chips">${emails.map(e=>`<span class="pill pill-dim" style="font-family:var(--mono);font-size:11px;text-transform:none">${esc(e)}</span>`).join('')}</div>`:''}
+    ${repos.length?`<div class="sub-label" style="margin-top:16px">Repositories</div><div class="panel">${repos.slice(0,15).map(r=>`<div class="kv"><span class="kv-k mono">${esc(r)}</span></div>`).join('')}</div>`:''}
+    ${jsonUI(d)}`;
+  showR('githubIntelRes');
+}
+
+async function loadSupervisorOverview() {
+  const el = document.getElementById('supervisorRes');
+  showL('supervisorLoad');
+  try {
+    const d = await api('/api/supervisor/overview');
+    el.innerHTML = `<div class="stats">
+      <div class="stat"><div class="stat-n">${d.active_cases_count||0}</div><div class="stat-l">Open Cases</div></div>
+      <div class="stat"><div class="stat-n">${(d.online_sessions||[]).length}</div><div class="stat-l">Online Sessions</div></div>
+      <div class="stat"><div class="stat-n">${(d.recent_audit||[]).length}</div><div class="stat-l">Recent Audit</div></div>
+    </div>
+    <div class="sub-label" style="margin-top:16px">Recent Audit (last 10)</div>
+    <div class="panel">${(d.recent_audit||[]).slice(0,10).map(e=>`<div class="kv"><span class="kv-k mono">${esc(e.timestamp||'')}</span><span class="kv-v">${esc(e.action||'')}</span></div>`).join('')||'<div class="note">No entries.</div>'}</div>`;
+    showR('supervisorRes');
+  } catch(e) { toast(e.message); }
+  finally { hideL('supervisorLoad'); }
+}
+document.querySelector('[data-section="supervisor"]')?.addEventListener('click', () => setTimeout(loadSupervisorOverview, 100));
+
+// ── Guided Tour System (GPU-composited spotlight; transform + opacity only) ──
+const tourSteps = [
+  { targetSelector: 'aside.sidebar', title: 'Sidebar Navigation', desc: 'Use the sidebar to switch between Identity Intel, Domain Scan, Email Footprint, Threat Analysis, Network Tools, and Forensics modules.', tab: 'identity' },
+  { targetId: 'casePanel', title: 'Investigation Case', desc: 'Optional at session start: enable case mode to log actions per case and export chain-of-custody reports. Ad-hoc mode lets you run all tools without a case.', tab: 'identity' },
+  { targetId: 'c-ip', title: 'Run a Scan', desc: 'Enter a target and run a tool — for example, scan an IP address for geolocation, ASN, and threat intelligence.', tab: 'identity' },
+  { targetId: 'caseExportBtn', title: 'Export Evidence', desc: 'Export a chain-of-custody HTML report for the active case. Result cards also include Export Evidence buttons for individual operations.', tab: 'identity' },
+  { targetId: 'vaultBtn', title: 'Settings & API Keys', desc: 'Store VirusTotal, AbuseIPDB, and Truecaller keys in the encrypted vault. Admins can manage investigator profiles here.', tab: 'identity' },
+  { targetId: 'tourBtn', title: 'Replay This Tour', desc: 'Press the ? icon anytime to replay this guided walkthrough.', tab: 'identity' },
+];
+
+const _reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+let tourIdx = -1, tourActive = false, tourEls = null, tourRaf = 0, tourLastFocus = null;
+
+function tourTarget(step) {
+  if (!step) return null;
+  if (step.targetId) return document.getElementById(step.targetId);
+  if (step.targetSelector) return document.querySelector(step.targetSelector);
+  return null;
+}
+function buildTourEls() {
+  if (tourEls) return tourEls;
+  const overlay = document.createElement('div');
+  overlay.className = 'tour-overlay';
+  const spot = document.createElement('div');
+  spot.className = 'tour-spotlight';
+  const tip = document.createElement('div');
+  tip.className = 'tour-tooltip';
+  tip.setAttribute('role', 'dialog');
+  tip.setAttribute('aria-modal', 'true');
+  tip.setAttribute('aria-label', 'Guided tour');
+  tip.tabIndex = -1;
+  overlay.appendChild(spot);
+  document.body.appendChild(overlay);
+  document.body.appendChild(tip);
+  overlay.addEventListener('click', endWebTour);
+  tourEls = { overlay, spot, tip };
+  return tourEls;
+}
+function scheduleTourPosition() {
+  if (tourRaf) return;
+  tourRaf = requestAnimationFrame(() => { tourRaf = 0; positionTour(); });
+}
+function positionTour() {
+  if (!tourActive || !tourEls) return;
+  const { spot, tip } = tourEls;
+  const target = tourTarget(tourSteps[tourIdx]);
+  if (target) {
+    const r = target.getBoundingClientRect();
+    const pad = 6;
+    const x = Math.max(6, r.left - pad), y = Math.max(6, r.top - pad);
+    spot.style.width = (r.width + pad * 2) + 'px';
+    spot.style.height = (r.height + pad * 2) + 'px';
+    spot.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+    spot.style.opacity = '1';
+    placeTip(r);
+  } else {
+    spot.style.opacity = '0';
+    const tw = tip.offsetWidth || 340, th = tip.offsetHeight || 200;
+    tip.style.transform = `translate3d(${Math.round((innerWidth - tw) / 2)}px, ${Math.round((innerHeight - th) / 2)}px, 0)`;
+  }
+}
+function placeTip(r) {
+  const tip = tourEls.tip;
+  const tw = tip.offsetWidth || 340, th = tip.offsetHeight || 200, gap = 14, m = 10;
+  let y;
+  if (innerHeight - r.bottom > th + gap + m) y = r.bottom + gap;
+  else if (r.top > th + gap + m) y = r.top - th - gap;
+  else y = (innerHeight - th) / 2;
+  let x = r.left + r.width / 2 - tw / 2;
+  x = Math.min(Math.max(m, x), innerWidth - tw - m);
+  y = Math.min(Math.max(m, y), innerHeight - th - m);
+  tip.style.transform = `translate3d(${Math.round(x)}px, ${Math.round(y)}px, 0)`;
+}
+function renderTipContent(idx) {
+  const step = tourSteps[idx];
+  const dots = tourSteps.map((_, i) => `<span class="tour-dot ${i === idx ? 'active' : ''}"></span>`).join('');
+  const opts = tourSteps.map((s, i) => `<option value="${i}" ${i === idx ? 'selected' : ''}>${i + 1}. ${esc(s.title)}</option>`).join('');
+  tourEls.tip.innerHTML = `
+    <div class="tour-title">${esc(step.title)}</div>
+    <div style="margin:8px 0 12px"><label for="tourJump" style="font-size:10px;text-transform:uppercase;color:var(--text-tertiary);font-weight:700;display:block;margin-bottom:4px;letter-spacing:0.1em">Jump to feature</label>
+      <select id="tourJump" class="field" style="padding:6px 10px;font-size:12.5px;border-radius:8px;cursor:pointer;" onchange="tourGoto(parseInt(this.value,10))" aria-label="Jump to tour step">${opts}</select></div>
+    <div class="tour-desc">${esc(step.desc)}</div>
+    <div class="tour-footer">
+      <button class="tour-btn-skip" type="button" onclick="endWebTour()">Skip</button>
+      <div class="tour-dots" aria-hidden="true">${dots}</div>
+      <div style="display:flex;gap:6px;align-items:center">
+        ${idx > 0 ? `<button class="tour-btn" type="button" onclick="tourGoto(${idx - 1})">Back</button>` : ''}
+        <button class="tour-btn" type="button" onclick="tourGoto(${idx + 1})" data-tour-next>${idx === tourSteps.length - 1 ? 'Finish' : 'Next'}</button>
+      </div>
+    </div>`;
+}
+function tourGoto(idx) {
+  if (idx < 0) idx = 0;
+  if (idx >= tourSteps.length) { endWebTour(); return; }
+  tourIdx = idx;
+  const step = tourSteps[idx];
+  if (step.tab) go(step.tab, document.querySelector(`button[data-section="${step.tab}"]`));
+  renderTipContent(idx);
+  tourEls.tip.classList.add('visible');
+  const target = tourTarget(step);
+  if (target) target.scrollIntoView({ behavior: _reduceMotion.matches ? 'auto' : 'smooth', block: 'center', inline: 'nearest' });
+  requestAnimationFrame(() => { positionTour(); try { tourEls.tip.focus({ preventScroll: true }); } catch (_) {} });
+}
+function startWebTour() {
+  buildTourEls();
+  tourActive = true;
+  tourLastFocus = document.activeElement;
+  tourEls.overlay.classList.add('visible');
+  document.addEventListener('keydown', tourKeydown, true);
+  window.addEventListener('resize', scheduleTourPosition, { passive: true });
+  window.addEventListener('scroll', scheduleTourPosition, { passive: true, capture: true });
+  tourGoto(0);
+}
+function endWebTour() {
+  if (!tourActive) return;
+  tourActive = false;
+  if (tourEls) {
+    tourEls.overlay.classList.remove('visible');
+    tourEls.tip.classList.remove('visible');
+    tourEls.spot.style.opacity = '0';
+  }
+  document.removeEventListener('keydown', tourKeydown, true);
+  window.removeEventListener('resize', scheduleTourPosition);
+  window.removeEventListener('scroll', scheduleTourPosition, true);
+  if (tourLastFocus && tourLastFocus.focus) { try { tourLastFocus.focus(); } catch (_) {} }
+}
+function tourKeydown(e) {
+  if (!tourActive) return;
+  if (e.key === 'Escape') { e.preventDefault(); endWebTour(); }
+  else if (e.key === 'ArrowRight' || e.key === 'Enter') { e.preventDefault(); tourGoto(tourIdx + 1); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); tourGoto(tourIdx - 1); }
+}
+
+// ── Enter key bindings ──
+const keyMap={ipInput:runIP,phoneInput:runPhone,userInput:runUser,domainInput:runDomain,emailInput:runEmail,breachInput:runBreach,query:startSearch,abuseTarget:runAbuseIP,vtTarget:runVirusTotal,swPortInput:runSpiderwebPort,swSubInput:runSpiderwebSub,swNetInput:runSpiderwebNet,swHashInput:runSpiderwebHash,dorkUserInput:runUsernameDork,emailSiteInput:runEmailSite,domainCrawlInput:runDomainCrawl,githubIntelInput:runGithubIntel};
+Object.entries(keyMap).forEach(([id,fn])=>document.getElementById(id)?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();fn();}}));
+
+document.getElementById('caseModeEnableBtn')?.addEventListener('click', showCaseModeForm);
+document.getElementById('caseModeSkipBtn')?.addEventListener('click', continueWithoutCase);
+document.getElementById('tcPhoneYesBtn')?.addEventListener('click', () => chooseTcPhone(true));
+document.getElementById('tcPhoneNoBtn')?.addEventListener('click', () => chooseTcPhone(false));
+document.getElementById('tcPhoneSetupBtn')?.addEventListener('click', submitTcPhoneSetup);
+document.getElementById('tcPhoneSetupSkipBtn')?.addEventListener('click', submitTcPhoneSetup);
+document.getElementById('tcPhoneSetupInput')?.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); submitTcPhoneSetup(); } });
+</script>
+</body>
+</html>

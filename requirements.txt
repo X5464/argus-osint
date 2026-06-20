@@ -1,0 +1,16 @@
+Flask==3.0.3
+Flask-Cors==4.0.1
+requests==2.32.3
+phonenumbers==8.13.39
+dnspython==2.6.1
+httpx[socks,http2]==0.27.0
+h2>=4.1.0
+pysocks==1.7.1
+cryptography>=42.0.0
+Flask-Limiter>=3.5.0
+truecallerpy
+holehe
+PyPDF2
+termcolor
+colorama>=0.4,<1
+beautifulsoup4==4.12.3

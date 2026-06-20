@@ -1,0 +1,33 @@
+version: "3.9"
+
+services:
+  argus:
+    build: .
+    container_name: argus-lea
+    ports:
+      - "127.0.0.1:5000:5000"
+    environment:
+      ARGUS_DEBUG: "0"
+      ARGUS_PORT: "5000"
+    volumes:
+      - argus_data:/app/data
+      - argus_audit:/app/data/audit
+    read_only: true
+    tmpfs:
+      - /tmp:size=64M,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+
+  # Optional Tor sidecar — enable if not using host Tor on 9050
+  tor:
+    image: dperson/torproxy:latest
+    container_name: argus-tor
+    profiles: ["tor"]
+    ports:
+      - "127.0.0.1:9050:9050"
+    restart: unless-stopped
+
+volumes:
+  argus_data:
+  argus_audit:

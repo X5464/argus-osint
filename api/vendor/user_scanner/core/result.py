@@ -1,0 +1,272 @@
+from __future__ import annotations
+
+import csv
+import io
+import json
+from enum import Enum
+from colorama import Fore, Style
+from user_scanner.core.helpers import ScanConfig
+
+# Added {url} to the debug message
+DEBUG_MSG = """Result {{
+  status: {status},
+  reason: "{reason}",
+  username: "{username}",
+  site_name: "{site_name}",
+  category: "{category}",
+  url: "{url}",
+  extra: "{extra}",
+  is_email: "{is_email}"
+}}"""
+
+
+# Added {url} to the CSV template
+CSV_FIELDS = ["username", "category", "site_name", "status", "url", "extra", "reason"]
+
+
+def indent_text(msg: str, level: int, ignore_first: bool = False) -> str:
+    if level <= 0 or not msg:
+        return msg
+
+    prefix = " " * level
+    lines = msg.splitlines()
+
+    if ignore_first and lines:
+        return lines[0] + "\n" + "\n".join(f"{prefix}{line}" for line in lines[1:])
+    return "\n".join(f"{prefix}{line}" for line in lines)
+
+
+def humanize_exception(e: Exception) -> str:
+    msg = str(e).lower()
+
+    if "10054" in msg:
+        return "Connection closed by remote server"
+    if "11001" in msg:
+        return "Could not resolve hostname"
+
+    if "errno 7" in msg or "no address associated with hostname" in msg:
+        return "No internet connection or DNS failure"
+
+    if "errno 101" in msg or "network is unreachable" in msg:
+        return "Network unreachable (Is your internet on?)"
+
+    return str(e)
+
+
+class Status(Enum):
+    TAKEN = 0
+    AVAILABLE = 1
+    ERROR = 2
+    SKIPPED = 3
+
+    def to_label(self, is_email=False):
+        if self == Status.ERROR:
+            return "Error"
+        elif self == Status.SKIPPED:
+            return "Skipped"
+        if is_email:
+            return "Registered" if self == Status.TAKEN else "Not Registered"
+        return "Found" if self == Status.TAKEN else "Not Found"
+
+    def __str__(self):
+        return self.to_label(is_email=False)
+
+
+class Result:
+    def __init__(self, status: Status, reason: str | Exception | None = None, **kwargs):
+        self.status = status
+        self.reason = reason
+        self.username = None
+        self.site_name = None
+        self.category = None
+        self.url = ""  # Initialized url field
+        self.extra: dict[str, str | bool | int] = {}
+        self.is_email = False
+        self.update(**kwargs)
+
+    def update(self, **kwargs):
+        # Added "url" to the list of fields allowed for dynamic updates
+        for field in ("username", "site_name", "category", "is_email", "url"):
+            if field in kwargs and kwargs[field] is not None:
+                setattr(self, field, kwargs[field])
+
+        if "extra" in kwargs and isinstance(kwargs["extra"], dict):
+            for key, value in kwargs["extra"].items():
+                if value is None or (isinstance(value, str) and not value.strip()):
+                    continue
+
+                clean_key = key.strip().rstrip(":").strip().replace(" ", "_").lower()
+                if not clean_key:
+                    continue
+
+                if not isinstance(value, (bool, int)):
+                    value = str(value)
+
+                self.extra[clean_key] = value
+
+        return self
+
+    @classmethod
+    def taken(cls, reason: str | Exception | None = None, **kwargs):
+        return cls(Status.TAKEN, reason, **kwargs)
+
+    @classmethod
+    def available(cls, reason: str | Exception | None = None, **kwargs):
+        return cls(Status.AVAILABLE, reason, **kwargs)
+
+    @classmethod
+    def error(cls, reason: str | Exception | None = None, **kwargs):
+        return cls(Status.ERROR, reason, **kwargs)
+
+    @classmethod
+    def skipped(cls, reason: str | Exception | None = None, **kwargs):
+        return cls(Status.SKIPPED, reason, **kwargs)
+
+    @classmethod
+    def from_number(cls, i: int, reason: str | Exception | None = None):
+        try:
+            status = Status(i)
+        except ValueError:
+            return cls(Status.ERROR, "Invalid status. Please contact maintainers.")
+        return cls(status, reason)
+
+    def to_number(self) -> int:
+        return self.status.value
+
+    def has_reason(self) -> bool:
+        return self.reason is not None
+
+    def get_reason(self) -> str:
+        if self.status == Status.SKIPPED and self.reason is None:
+            return "Notifies the target by forgot password email or similar"
+
+        if self.reason is None:
+            return ""
+
+        if isinstance(self.reason, str):
+            return self.reason
+
+        msg = humanize_exception(self.reason)
+        return f"{type(self.reason).__name__}: {msg.capitalize()}"
+
+    def as_dict(self) -> dict:
+        return {
+            "status": self.status.to_label(self.is_email),
+            "reason": self.get_reason(),
+            "username": self.username,
+            "site_name": self.site_name,
+            "category": self.category,
+            "url": self.url,  # Added url to dictionary output
+            "extra": self.extra,
+            "is_email": self.is_email,
+        }
+
+    def to_dict(self) -> dict:
+        """Prepares the clean dictionary for JSON/Exporting."""
+        data = self.as_dict()
+
+        if self.is_email:
+            data["email"] = data.pop("username")
+        data.pop("is_email", None)
+        return data
+
+    def debug(self) -> str:
+        return DEBUG_MSG.format(**self.as_dict())
+
+    def to_json(self) -> str:
+        data = self.to_dict()
+        return json.dumps(data, indent=4)
+
+    def to_csv(self) -> str:
+        # uses .as_dict() since header has "username"
+        data = self.as_dict()
+
+        # flatten multiline extra string parameters so it doesn't break row alignments
+        if data.get("extra"):
+            clean_extra = ""
+            for key, value in data["extra"].items():
+                clean_extra += f"{key}: {value}; "
+
+            data["extra"] = clean_extra.rstrip("; ")
+        else:
+            data["extra"] = ""
+
+        del data["is_email"]
+        output = io.StringIO()
+        writer = csv.DictWriter(output, fieldnames=CSV_FIELDS, lineterminator="")
+        writer.writerow(data)
+
+        return output.getvalue()
+
+    def __str__(self):
+        return self.get_reason()
+
+    def __eq__(self, other):
+        if isinstance(other, Status):
+            return self.status == other
+        if isinstance(other, Result):
+            return self.status == other.status
+        if isinstance(other, int):
+            return self.to_number() == other
+        return NotImplemented
+
+    def get_output_color(self) -> str:
+        if self == Status.ERROR:
+            return Fore.YELLOW
+        elif self == Status.SKIPPED:
+            return Fore.WHITE
+        else:
+            return Fore.GREEN if self == Status.TAKEN else Fore.RED
+
+    def get_output_icon(self) -> str:
+        if self == Status.ERROR:
+            return "[!]"
+        elif self == Status.SKIPPED:
+            return "[~]"
+        else:
+            return "[✔]" if self == Status.TAKEN else "[✘]"
+
+    def get_console_output(self, configs: ScanConfig | None = None) -> str:
+        site_name = self.site_name
+        status_text = self.status.to_label(self.is_email)
+        username = ""
+        if self.username:
+            username = f"({self.username})"
+        color = self.get_output_color()
+        icon = self.get_output_icon()
+
+        # Added logic to include URL in console output if show_url is True
+        ## Color the URL in white for better visibility
+        url_display = (
+            f" {Fore.WHITE}[{self.url}]{color}"
+            if (configs and configs.verbose) and self.url
+            else ""
+        )
+
+        # dynamic extra layout handling logic
+        extra_display = ""
+        for i, (key, value) in enumerate(self.extra.items()):
+            connector = "└──" if i == len(self.extra) - 1 else "├──"
+
+            if isinstance(value, str) and len(value.splitlines()) > 1:
+                value = "\n" + indent_text(value, 12, False)
+
+            extra_display += f"\n{' ' * 6}{Fore.CYAN}{connector} {key}: {value}"
+
+        reason = f" ({self.get_reason()})" if self.has_reason() else ""
+        reason = indent_text(reason, 12, True)
+
+        return f"  {color}{icon} {site_name}{url_display} {username}: {status_text}{reason}{extra_display}{Style.RESET_ALL}"
+
+    def is_found(self) -> bool:
+        """Returns True if the target was found or registered (Status.TAKEN)"""
+        return self.status == Status.TAKEN
+
+    def show(self, configs: ScanConfig):
+        """Prints the console output and returns itself for chaining.
+        If only_found is True, only results with Status.TAKEN are printed."""
+        # Updated show() to accept and pass the show_url flag
+        if configs.only_found and self.status != Status.TAKEN:
+            return self
+        print(self.get_console_output(configs))
+        return self
