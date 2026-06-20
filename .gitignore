@@ -4,7 +4,6 @@ __pycache__/
 .venv/
 venv/
 node_modules/
-jdk-17.0.19-full.jdk/
 audit.log
 data/
 *.db
