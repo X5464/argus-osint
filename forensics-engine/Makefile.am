@@ -51,7 +51,7 @@ EXTRA_DIST = \
 	licenses/cpl1.0.txt \
 	licenses/bsd.txt \
 	licenses/mit.txt \
-	packages/sleuthkit.spec \
+	packages/forensics-engine.spec \
 	test/tools/cli_tests.txt \
 	test/tools/fstools/ils_output/1 \
 	test/tools/fstools/ils_output/2
@@ -857,8 +857,8 @@ ant_args+= -Ddefault-jar-location="@DEFAULT_JAR_LOCATION@"
 endif
 endif
 
-tsk_jar = $(top_builddir)/bindings/java/dist/sleuthkit-$(PACKAGE_VERSION).jar
-tsk_caseuco_jar = $(top_builddir)/case-uco/java/dist/sleuthkit-caseuco-$(PACKAGE_VERSION).jar
+tsk_jar = $(top_builddir)/bindings/java/dist/forensics-engine-$(PACKAGE_VERSION).jar
+tsk_caseuco_jar = $(top_builddir)/case-uco/java/dist/forensics-engine-caseuco-$(PACKAGE_VERSION).jar
 jardir = $(prefix)/share/java
 
 $(tsk_jar): tsk/libtsk.la bindings/java/jni/libtsk_jni.la tsk/.libs/@TSK_LIB@

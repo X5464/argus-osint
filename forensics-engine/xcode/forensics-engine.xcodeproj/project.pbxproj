@@ -525,7 +525,7 @@
 			attributes = {
 				LastUpgradeCheck = 0450;
 			};
-			buildConfigurationList = 026FB3840D19C831000434C7 /* Build configuration list for PBXProject "sleuthkit" */;
+			buildConfigurationList = 026FB3840D19C831000434C7 /* Build configuration list for PBXProject "forensics-engine" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -633,7 +633,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		026FB3840D19C831000434C7 /* Build configuration list for PBXProject "sleuthkit" */ = {
+		026FB3840D19C831000434C7 /* Build configuration list for PBXProject "forensics-engine" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				026FB3850D19C831000434C7 /* Debug */,

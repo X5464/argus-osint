@@ -1,4 +1,4 @@
-Name:		sleuthkit
+Name:		forensics-engine
 Version:	4.15.0-develop
 Release:	1%{?dist}
 Summary:	The Sleuth Kit (TSK) is a library and collection of command line tools that allow you to investigate volume and file system data.

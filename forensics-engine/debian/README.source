@@ -1,5 +1,5 @@
-sleuthkit for Debian
--------------------
+forensics-engine for Debian
+------------------------
 
 These debian files are not for the official debian packaging and it does not meet all of the Debian rules because it depends on SQLITE JDBC jar file that is not available as a Debian package.
 
